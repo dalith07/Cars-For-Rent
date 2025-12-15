@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  USER
+}
+
+// ========== USERS ==========
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  password      String?
+  role          UserRole  @default(USER)
+  status        String    @default("Inactive")
+
+  accounts Account[]
+
+  createdAt     DateTime       @default(now())
+  profile       Profile?
+  orders        Order[]
+  notifications Notification[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Profile {
+  id            String   @id @default(cuid())
+  phoneNumber   String?
+  streetAddress String?
+  city          String?
+  postalCode    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ========== CATEGORY ==========
+model Category {
+  id   String @id @default(cuid())
+  name String @unique
+
+  itemsCars ItemsCars[]
+}
+
+// ========== MODELS ==========
+model Model {
+  id   String @id @default(cuid())
+  name String @unique
+
+  itemsCars ItemsCars[]
+}
+
+model ItemsCars {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  price        Float
+  year         Int
+  engine       String
+  horsepower   Int
+  quantity     Float    @default(0)
+  discount     Float?   @default(0)
+  status       String   @default("available")
+  version      String   @default("Occasion")
+  transmission String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String?
+  model      Model?    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  modelId    String?
+
+  imagesOnCars ImagesOnCars[]
+}
+
+// ========== IMAGES ITEMS-CARS ==========
+model ImagesOnCars {
+  id        String    @id @default(cuid())
+  imageUrl  String
+  productId String
+  itemsCars ItemsCars @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// ========== ORDERS ==========
+model Order {
+  id              String   @id @default(cuid())
+  orderNumber     String   @unique
+  userId          String?
+  customerName    String
+  phoneNumber     String
+  country         String
+  customerEmail   String
+  subtotal        Float
+  tax             Float?
+  shipping        Float?
+  total           Float
+  shippingAddress String?
+  isPaid          String?  @default("Not Paid")
+  status          String?  @default("processing")
+  paymentMethod   String   @default("Cash on Delivery")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user  User?       @relation(fields: [userId], references: [id])
+  items OrderItem[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ========== ORDERS ITEM==========
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productId   String
+  name        String
+  description String?
+  price       Float
+  quantity    Int
+  discount    Float    @default(0)
+  image       String?
+  category    String?
+  model       String?
+  subtotal    Float
+  createdAt   DateTime @default(now())
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
