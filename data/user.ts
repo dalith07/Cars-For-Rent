@@ -12,6 +12,30 @@ export const getUserByEmail = async (email: string) => {
   }
 };
 
+// export const getUserById = async (id: string) => {
+//   try {
+//     const user = await prisma.user.findUnique({
+//       where: { id },
+//       select: {
+//         id: true,
+//         email: true,
+//         emailVerified: true,
+//         role: true,
+//         password: true,
+//         name: true,
+//         image: true,
+//         profile: true,
+//         status: true,
+//         createdAt: true,
+//       },
+//     });
+
+//     return user;
+//   } catch {
+//     return null;
+//   }
+// };
+
 export const getUserById = async (id: string) => {
   try {
     const user = await prisma.user.findUnique({
@@ -24,11 +48,18 @@ export const getUserById = async (id: string) => {
         password: true,
         name: true,
         image: true,
-        profile: true,
+        status: true,
+        createdAt: true,
+        profile: true, // Prisma field
       },
     });
 
-    return user;
+    if (!user) return null;
+
+    return {
+      ...user,
+      Profile: user.profile, // rename to match type
+    };
   } catch {
     return null;
   }

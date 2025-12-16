@@ -35,9 +35,6 @@ export default function CartPage() {
     const router = useRouter()
     const { items, removeItem, updateQuantity, clearCart, getTotalPrice } = useCart()
 
-
-
-
     // (Temporary mock for orders context)
     const { refreshOrderCount } = useOrders()
 
@@ -47,6 +44,7 @@ export default function CartPage() {
         if (user) {
             setCustomerName(user.name || "");
             setCustomerEmail(user.email || "");
+            //   setPhoneNumber(user.. || "");
         }
     }, [user]);
 
@@ -62,7 +60,6 @@ export default function CartPage() {
     const tax = subtotal * 0.1 // 10% tax
     const shipping = subtotal > 50 ? 0 : 9.99 // Free shipping over $50
     const total = subtotal + tax + shipping
-
 
     // ✅ FIXED CHECKOUT FUNCTION
     const handleCheckout = async () => {

@@ -15,11 +15,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export type UserWithProfile = User & { Profile: Profile };
+// export type UserWithProfile = User & { Profile: Profile };
+
+export type UserWithProfile = User & { Profile: Profile | null };
 
 export type ItemsCarsWithAll = ItemsCars & {
   category: Category;
   model: Model;
+  imagesOnCars: ImagesOnCars[];
+};
+
+export type ItemsCarsWithAlll = ItemsCars & {
+  category: Category | null;
+  model: Model | null;
   imagesOnCars: ImagesOnCars[];
 };
 

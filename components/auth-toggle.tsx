@@ -37,7 +37,9 @@ export default function AuthToggle() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25 }}
-                    className="absolute w-[250px] top-16 right-2 flex flex-col gap-3 bg-gray-800 border-gray-700 p-4 rounded-xl shadow-lg border z-50"
+                    className="absolute w-[90vw] max-w-[320px] sm:w-[280px] top-16 
+                    right-2 flex flex-col gap-3 bg-gray-800 border-gray-700 p-4 
+                    rounded-xl shadow-lg border z-50"
                 >
                     {user ? (
                         <div className="">
@@ -47,11 +49,9 @@ export default function AuthToggle() {
                                     height={50}
                                     className="rounded-full"
                                 />
-                                <h1 className="font-medium text-white">My Account :
-                                    <span className="font-bold block">
-                                        {user.email} <span className="absolute top-2 right-2">{user.role === "ADMIN" && (
-                                            <FaStar size={24} className="text-yellow-500 animate-pulse" />
-                                        )}</span>
+                                <h1 className="font-bold text-white">My Account :
+                                    <span className="text-sm block break-all">
+                                        {user.email}
                                     </span>
                                 </h1>
                             </div>

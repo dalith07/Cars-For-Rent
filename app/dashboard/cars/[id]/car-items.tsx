@@ -3,7 +3,6 @@
 "use client";
 
 import { useCallback, useEffect, useState, } from "react";
-import { ItemsCarsWithAll } from "@/lib/utils";
 
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -21,14 +20,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { deleteImageCarItemById, updateCarItem } from "@/actions/dashboard/cars";
+import { ItemsCarsWithAlll } from "@/lib/utils";
 
 interface carsItemsProps {
-    carsItems: ItemsCarsWithAll;
+    carsItems: ItemsCarsWithAlll;
 }
 
 interface ImageFileAndProductnWithImagesProps {
     id?: string
-    file: File;
+    file?: File | null;  // <-- allow null
     preview: string;
     uploaded?: boolean;
     url?: string;
@@ -72,8 +72,10 @@ export default function CarItems({ carsItems }: carsItemsProps) {
     const [categories, setCategories] = useState<Category[]>([]);
     const [models, setModels] = useState<Model[]>([]);
     const [modelMenu, setModelMenu] = useState<Record<string, boolean>>({});
-    const [selectedCategoryId, setSelectedCategoryId] = useState(carsItems.category.name ?? "");
-    const [selectedModelId, setSelectedModelId] = useState(carsItems.model.name ?? "");
+
+    const [selectedCategoryId, setSelectedCategoryId] = useState(carsItems.category?.name ?? "");
+    const [selectedModelId, setSelectedModelId] = useState(carsItems.model?.name ?? "");
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -89,8 +91,8 @@ export default function CarItems({ carsItems }: carsItemsProps) {
                 icon: "/logos/logo-mercedes.png",
                 models: [
                     { id: "tesla_model_s", name: "Tesla Model S" },
-                    { id: "tesla_model_3", name: "Tesla Model 3" },
-                    { id: "tesla_model_x", name: "Tesla Model X" },
+                    // { id: "tesla_model_3", name: "Tesla Model 3" },
+                    // { id: "tesla_model_x", name: "Tesla Model X" },
                     { id: "tesla_model_y", name: "Tesla Model Y" },
                 ],
             },
@@ -99,9 +101,9 @@ export default function CarItems({ carsItems }: carsItemsProps) {
                 icon: "/logos/logo-audi.png",
                 models: [
                     { id: "audi_a4", name: "Audi A4" },
-                    { id: "audi_a6", name: "Audi A6" },
-                    { id: "audi_a8", name: "Audi A8" },
-                    { id: "audi_q5", name: "Audi Q5" },
+                    // { id: "audi_a6", name: "Audi A6" },
+                    // { id: "audi_a8", name: "Audi A8" },
+                    // { id: "audi_q5", name: "Audi Q5" },
                     { id: "audi_q7", name: "Audi Q7" },
                 ]
             },
@@ -109,15 +111,50 @@ export default function CarItems({ carsItems }: carsItemsProps) {
                 brand: "BMW",
                 icon: "/logos/logo-bmw.png",
                 models: [
-                    { id: "bmw_3series", name: "BMW 3 Series" },
-                    { id: "bmw_5series", name: "BMW 5 Series" },
-                    { id: "bmw_7series", name: "BMW 7 Series" },
-                    { id: "bmw_m3", name: "BMW M3" },
-                    { id: "bmw_m4", name: "BMW M4" },
-                    { id: "bmw_x5", name: "BMW X5" },
+                    // { id: "bmw_3series", name: "BMW 3 Series" },
+                    // { id: "bmw_5series", name: "BMW 5 Series" },
+                    // { id: "bmw_7series", name: "BMW 7 Series" },
+                    // { id: "bmw_m3", name: "BMW M3" },
+                    // { id: "bmw_m4", name: "BMW M4" },
+                    // { id: "bmw_x5", name: "BMW X5" },
                     { id: "bmw_x6", name: "BMW X6" },
                     { id: "bmw_m5_competition", name: "BMW M5 Competition" },
                     { id: "bmw_f30", name: "BMW F30 M Sport" },
+                ]
+            },
+            {
+                brand: "Mercedess",
+                icon: "/logos/logo-mercedes.png",
+                models: [
+                    { id: "mercedes_g_class", name: "Mercedes G Class" },
+                    { id: "mercedes_a_class", name: "Mercedes A Class" },
+                ]
+            },
+
+            {
+                brand: "Seat",
+                icon: "/logos/logo-seat.png",
+                models: [
+                    { id: "seat", name: "Seat" },
+                    { id: "seat_leion", name: "Seat Leion" },
+                ]
+            },
+
+            {
+                brand: "Golf",
+                icon: "/logos/logo-golf.png",
+                models: [
+                    { id: "golf_7", name: "Golf 7" },
+                    { id: "golf_7r", name: "Golf 7R" },
+                    { id: "golf_8", name: "Golf 8" },
+                ]
+            },
+
+            {
+                brand: "Toyota",
+                icon: "/logos/logo-toyota.png",
+                models: [
+                    { id: "toyota_corolla", name: "Toyota Corolla" },
                 ]
             },
         ]);
@@ -212,13 +249,34 @@ export default function CarItems({ carsItems }: carsItemsProps) {
         multiple: true,
     });
 
+    // const uploadImages = async () => {
+    //     if (images.length === 0) return;
+
+    //     const filesToUpload = images.filter((img) => !img.uploaded).map((img) => img.file);
+
+    //     if (filesToUpload.length === 0) {
+    //         alert("All images are already uploaded!");
+    //         return;
+    //     }
+
+    //     setIsUploading(true);
+    //     try {
+    //         await startUpload(filesToUpload, {});
+    //     } catch (error: any) {
+    //         toast.error("Upload failed:", error)
+    //         setIsUploading(false);
+    //     }
+    // };
+
     const uploadImages = async () => {
         if (images.length === 0) return;
 
-        const filesToUpload = images.filter((img) => !img.uploaded).map((img) => img.file);
+        const filesToUpload: File[] = images
+            .filter((img): img is ImageFileAndProductnWithImagesProps & { file: File } => !!img.file && !img.uploaded)
+            .map((img) => img.file);
 
         if (filesToUpload.length === 0) {
-            alert("All images are already uploaded!");
+            toast.warning("All images are already uploaded!");
             return;
         }
 
@@ -226,10 +284,13 @@ export default function CarItems({ carsItems }: carsItemsProps) {
         try {
             await startUpload(filesToUpload, {});
         } catch (error: any) {
-            toast.error("Upload failed:", error)
+            toast.error("Upload failed: " + error.message);
+        } finally {
             setIsUploading(false);
         }
     };
+
+
 
     const getDropzoneStyle = () => {
         const baseStyle = "border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer";

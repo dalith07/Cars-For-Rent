@@ -40,7 +40,6 @@ export default function OrdersPage({ ordersItems }: OrdersPageProps) {
         return matchesSearch && matchesStatus
     })
 
-
     const totalPages = Math.ceil(filteredOrders.length / ordersPerPage)
     const startIndex = (currentPage - 1) * ordersPerPage
     const endIndex = startIndex + ordersPerPage

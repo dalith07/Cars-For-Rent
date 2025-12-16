@@ -124,8 +124,8 @@ const CreateCars = () => {
                     icon: "/logos/logo-mercedes.png",
                     models: [
                         { id: "tesla_model_s", name: "Tesla Model S" },
-                        { id: "tesla_model_3", name: "Tesla Model 3" },
-                        { id: "tesla_model_x", name: "Tesla Model X" },
+                        // { id: "tesla_model_3", name: "Tesla Model 3" },
+                        // { id: "tesla_model_x", name: "Tesla Model X" },
                         { id: "tesla_model_y", name: "Tesla Model Y" },
                     ],
                 },
@@ -134,9 +134,9 @@ const CreateCars = () => {
                     icon: "/logos/logo-audi.png",
                     models: [
                         { id: "audi_a4", name: "Audi A4" },
-                        { id: "audi_a6", name: "Audi A6" },
-                        { id: "audi_a8", name: "Audi A8" },
-                        { id: "audi_q5", name: "Audi Q5" },
+                        // { id: "audi_a6", name: "Audi A6" },
+                        // { id: "audi_a8", name: "Audi A8" },
+                        // { id: "audi_q5", name: "Audi Q5" },
                         { id: "audi_q7", name: "Audi Q7" },
                     ]
                 },
@@ -144,15 +144,50 @@ const CreateCars = () => {
                     brand: "BMW",
                     icon: "/logos/logo-bmw.png",
                     models: [
-                        { id: "bmw_3series", name: "BMW 3 Series" },
-                        { id: "bmw_5series", name: "BMW 5 Series" },
-                        { id: "bmw_7series", name: "BMW 7 Series" },
-                        { id: "bmw_m3", name: "BMW M3" },
-                        { id: "bmw_m4", name: "BMW M4" },
-                        { id: "bmw_x5", name: "BMW X5" },
+                        // { id: "bmw_3series", name: "BMW 3 Series" },
+                        // { id: "bmw_5series", name: "BMW 5 Series" },
+                        // { id: "bmw_7series", name: "BMW 7 Series" },
+                        // { id: "bmw_m3", name: "BMW M3" },
+                        // { id: "bmw_m4", name: "BMW M4" },
+                        // { id: "bmw_x5", name: "BMW X5" },
                         { id: "bmw_x6", name: "BMW X6" },
                         { id: "bmw_m5_competition", name: "BMW M5 Competition" },
                         { id: "bmw_f30", name: "BMW F30 M Sport" },
+                    ]
+                },
+                {
+                    brand: "Mercedess",
+                    icon: "/logos/logo-mercedes.png",
+                    models: [
+                        { id: "mercedes_g_class", name: "Mercedes G Class" },
+                        { id: "mercedes_a_class", name: "Mercedes A Class" },
+                    ]
+                },
+
+                {
+                    brand: "Seat",
+                    icon: "/logos/logo-seat.png",
+                    models: [
+                        { id: "seat", name: "Seat" },
+                        { id: "seat_leion", name: "Seat Leion" },
+                    ]
+                },
+
+                {
+                    brand: "Golf",
+                    icon: "/logos/logo-golf.png",
+                    models: [
+                        { id: "golf_7", name: "Golf 7" },
+                        { id: "golf_7r", name: "Golf 7R" },
+                        { id: "golf_8", name: "Golf 8" },
+                    ]
+                },
+
+                {
+                    brand: "Toyota",
+                    icon: "/logos/logo-toyota.png",
+                    models: [
+                        { id: "toyota_corolla", name: "Toyota Corolla" },
                     ]
                 },
             ]);

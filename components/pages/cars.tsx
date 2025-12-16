@@ -8,15 +8,15 @@ import Header from "../dashboard/header"
 import { Button } from "../ui/button"
 import Link from "next/link"
 import { ItemsCars } from "@prisma/client"
-import { ItemsCarsWithAll } from "@/lib/utils"
+import { ItemsCarsWithAll, ItemsCarsWithAlll } from "@/lib/utils"
 import { deleteCarItem } from "@/actions/dashboard/cars"
 
 interface CarItemsProps {
-    carItems: ItemsCarsWithAll[];
+    carItems: ItemsCarsWithAlll[];
 }
 
 export default function CarsPage({ carItems }: CarItemsProps) {
-    const [carsItems, setCarItems] = useState<ItemsCarsWithAll[]>(carItems);
+    const [carsItems, setCarItems] = useState<ItemsCarsWithAlll[]>(carItems);
     const containerRef = useRef<HTMLDivElement>(null)
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 9

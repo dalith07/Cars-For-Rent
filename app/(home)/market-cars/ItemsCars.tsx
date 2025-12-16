@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
@@ -11,13 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart, Search, Loader2, Timer, CalendarDays } from "lucide-react";
-import { ItemsCarsWithAll } from "@/lib/utils";
+import { ItemsCarsWithAlll } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ARTICLE_PER_PAGE } from "@/lib/constants";
 import { useCart } from "@/lib/cart_context";
 
 interface Props {
-    cars: ItemsCarsWithAll[];
+    cars: ItemsCarsWithAlll[];
 }
 
 interface PaginationInfo {
@@ -31,7 +32,7 @@ export default function ItemsCarsClient({ cars }: Props) {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const { addItem } = useCart();
 
-    const [filteredCars, setFilteredCars] = useState<ItemsCarsWithAll[]>(cars);
+    const [filteredCars, setFilteredCars] = useState<ItemsCarsWithAlll[]>(cars);
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [search, setSearch] = useState<string>("");
     const [loading, setLoading] = useState(false);
@@ -230,16 +231,17 @@ export default function ItemsCarsClient({ cars }: Props) {
                                                     discount: car.discount ?? 0,
                                                     imagesOnCars: car.imagesOnCars ?? [],
                                                     category: {
-                                                        id: car.category.id,
-                                                        name: car.category.name,
+                                                        id: car.category?.id ?? "unknown",
+                                                        name: car.category?.name ?? "Unknown",
                                                     },
                                                     model: {
-                                                        id: car.model?.id,
-                                                        name: car.model?.name,
+                                                        id: car.model?.id ?? "unknown",
+                                                        name: car.model?.name ?? "Unknown",
                                                     },
+
                                                     quantity: car.quantity ?? 0,
                                                     description: car.description,
-                                                })
+                                                } as any)
                                             }
                                         >
                                             <ShoppingCart className="h-4 w-4 mr-2 animate-bounce" />

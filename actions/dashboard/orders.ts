@@ -28,14 +28,8 @@ export async function updateOrder(
   try {
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
-      data: {
-        status,
-        isPaid, // Keep as string, not boolean
-      },
-      include: {
-        items: true,
-        user: true,
-      },
+      data: { status, isPaid },
+      include: { user: true, items: true },
     });
 
     if (
@@ -44,7 +38,7 @@ export async function updateOrder(
     ) {
       await prisma.notification.create({
         data: {
-          userId: updatedOrder.userId, // now TypeScript is happy ✅
+          userId: updatedOrder.userId,
           title:
             status === "confirmed"
               ? "Order Confirmed ✅"

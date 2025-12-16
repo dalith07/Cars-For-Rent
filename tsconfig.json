@@ -1,8 +1,5 @@
 {
   "compilerOptions": {
-    "types": [
-      "swiper"
-    ],
     "target": "ES2017",
     "lib": [
       "dom",

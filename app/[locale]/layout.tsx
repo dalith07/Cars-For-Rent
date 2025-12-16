@@ -1,38 +1,17 @@
-import { notFound } from "next/navigation"
-import { CartProvider } from "@/lib/cart_context"
-import { Suspense } from "react"
-import Loading from "../loading"
-import { Toaster } from "@/components/ui/sonner"
-
-const locales = ["en", "fr", "ar"]
+import type { ReactNode } from "react"
 
 export default function LocaleLayout({
-  children,
-  params,
+    children,
 }: {
-  children: React.ReactNode
-  params: { locale: string }
+    children: ReactNode
 }) {
-  if (!locales.includes(params.locale)) {
-    notFound()
-  }
+    return children
+}
 
-  return (
-    <html
-      lang={params.locale}
-      dir={params.locale === "ar" ? "rtl" : "ltr"}
-      suppressHydrationWarning
-    >
-      <body>
-        <CartProvider>
-          <main className="flex flex-col min-h-[calc(100vh-3.5rem-1px)]">
-            <Suspense fallback={<Loading />}>
-              {children}
-              <Toaster position="bottom-right" richColors />
-            </Suspense>
-          </main>
-        </CartProvider>
-      </body>
-    </html>
-  )
+export function generateStaticParams() {
+    return [
+        { locale: "en" },
+        { locale: "fr" },
+        { locale: "ar" },
+    ]
 }

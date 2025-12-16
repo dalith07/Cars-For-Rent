@@ -14,7 +14,6 @@ const page = async ({ params }: PageProps) => {
         </div>;
     }
 
-    // console.log("cars by iiiiiiiiiid:🥹", carsItems)
     return (
         <CarItems carsItems={carsItems} />)
 }

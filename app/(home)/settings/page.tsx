@@ -16,8 +16,9 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProfileSchema } from "@/lib/validationSchema";
 import { useForm } from "react-hook-form";
-import { profile } from "@/actions/profile";
 import { useUploadThing } from "@/lib/uploadthing";
+import { createOrUpdateProfile } from "@/actions/profile";
+import { getUserProfile } from "@/actions/dashboard/users";
 
 export default function ProfilePage() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -38,28 +39,40 @@ export default function ProfilePage() {
     const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition();
 
+    // const form = useForm<z.infer<typeof ProfileSchema>>({
+    //     resolver: zodResolver(ProfileSchema),
+    // });
+
+    useEffect(() => {
+        if (!user?.id) return;
+
+        const loadProfile = async () => {
+            const profile = await getUserProfile(user.id);
+
+            if (profile) {
+                // eslint-disable-next-line react-hooks/immutability
+                form.reset({
+                    phoneNumber: profile.phoneNumber || "",
+                    streetAddress: profile.streetAddress || "",
+                    postalCode: profile.postalCode || "",
+                    city: profile.city || "",
+                });
+            }
+        };
+
+        loadProfile();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id,]);
+
     const form = useForm<z.infer<typeof ProfileSchema>>({
         resolver: zodResolver(ProfileSchema),
+        defaultValues: {
+            phoneNumber: phone,
+            streetAddress: streetAddress,
+            postalCode: postalCode,
+            city: city,
+        },
     });
-
-    const handelOnSubmit = (values: z.infer<typeof ProfileSchema>) => {
-        setError("");
-        setSuccess("");
-
-        console.log(values)
-
-        if (!user?.id) {
-            setError("User not found.");
-            return;
-        }
-
-        startTransition(() => {
-            profile(values, email, user.id).then((data) => {
-                setError(data?.error);
-                setSuccess(data?.success);
-            });
-        });
-    };
 
     useEffect(() => {
         if (!user) return;
@@ -104,6 +117,23 @@ export default function ProfilePage() {
     };
 
     const onDropRejected = () => toast.error("Invalid file format");
+
+    const handelOnSubmit = (values: z.infer<typeof ProfileSchema>) => {
+        setError("");
+        setSuccess("");
+
+        if (!user?.id) {
+            setError("User not found.");
+            return;
+        }
+        startTransition(() => {
+            createOrUpdateProfile(values, user.id).then((data) => {
+                setError(data?.error);
+                setSuccess(data?.success);
+            });
+        });
+    };
+
 
     return (
         <div
@@ -161,6 +191,7 @@ export default function ProfilePage() {
                                 className="bg-white/10 border-white/20 text-white"
                                 placeholder="Full name"
                                 value={userName}
+                                disabled
                                 onChange={(e) => setUserName(e.target.value)}
                             />
 
@@ -169,35 +200,32 @@ export default function ProfilePage() {
                                 placeholder="Email"
                                 type="email"
                                 value={email}
+                                disabled
                                 onChange={(e) => setEmail(e.target.value)}
                             />
 
                             <Input
+                                {...form.register("phoneNumber")}
                                 className="bg-white/10 border-white/20 text-white"
                                 placeholder="Phone number"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
                             />
 
                             <Input
+                                {...form.register("streetAddress")}
                                 className="bg-white/10 border-white/20 text-white"
                                 placeholder="Street address"
-                                value={streetAddress}
-                                onChange={(e) => setStreetAddress(e.target.value)}
                             />
 
                             <Input
+                                {...form.register("postalCode")}
                                 className="bg-white/10 border-white/20 text-white"
                                 placeholder="Postal Code"
-                                value={postalCode}
-                                onChange={(e) => setPostalCode(e.target.value)}
                             />
 
                             <Input
+                                {...form.register("city")}
                                 className="bg-white/10 border-white/20 text-white"
                                 placeholder="City"
-                                value={city}
-                                onChange={(e) => setCity(e.target.value)}
                             />
 
                             <Button

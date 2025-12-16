@@ -99,7 +99,7 @@ const Hero = () => {
                         </Button>
                     </Link>
 
-                    <Link href="/MarketCars">
+                    <Link href="/market-cars">
                         <Button size={"lg"} className="hover:cursor-pointer">
                             Rent a Car
                         </Button>

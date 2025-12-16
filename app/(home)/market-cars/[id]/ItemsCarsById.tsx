@@ -138,7 +138,7 @@ export default function ProductDetailPage({ cars }: ProductPageProps) {
                                             className="object-cover"
                                             priority
                                         />
-                                        {cars.discount > 0 && (
+                                        {cars.discount && cars.discount > 0 && (
                                             <Badge className="absolute top-4 right-4 bg-red-500 text-white text-lg">
                                                 -{cars.discount}%
                                             </Badge>

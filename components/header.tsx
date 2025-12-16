@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Car, Handshake, House, Menu, ShoppingCart, X } from "lucide-react"
+import { Car, Handshake, House, Menu, MessagesSquare, ShoppingCart, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import clsx from "clsx";
@@ -150,6 +150,17 @@ export default function Header() {
                             </span>
                             <ShoppingCart className="mr-1 w-5 h-5" />
                             Your Orders
+                        </Link>
+
+                        <Link
+                            href="/notifications"
+                            className={clsx(
+                                "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3 text-xs",
+                                pathname === "/" ? "text-blue-500" : "hover:text-blue-500 text-white"
+                            )}
+                        >
+                            <MessagesSquare className="mr-1 w-5 h-5" />
+                            Notification
                         </Link>
                     </div>
                 </div>
