@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,6 @@ export default function ItemsCarsClient({ cars }: Props) {
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [search, setSearch] = useState<string>("");
     const [loading, setLoading] = useState(false);
-
 
     // pagination
     const [pagination, setPagination] = useState<PaginationInfo>({

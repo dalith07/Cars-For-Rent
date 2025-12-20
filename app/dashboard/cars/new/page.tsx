@@ -343,13 +343,13 @@ const CreateCars = () => {
             return !img.uploaded && !hasUrl;
         });
 
-        console.log("unuploadedImages:✅✅", unuploadedImages);
-        console.log("All images state:", images.map(img => ({
-            name: img.file.name,
-            uploaded: img.uploaded,
-            url: img.url,
-            hasUploadedData: !!img.uploadedData
-        })));
+        // console.log("unuploadedImages:✅✅", unuploadedImages);
+        // console.log("All images state:", images.map(img => ({
+        //     name: img.file.name,
+        //     uploaded: img.uploaded,
+        //     url: img.url,
+        //     hasUploadedData: !!img.uploadedData
+        // })));
 
         if (unuploadedImages.length > 0) {
             toast.error("Please upload all images before submitting");
@@ -792,7 +792,7 @@ const CreateCars = () => {
                                     <Button
                                         type="submit"
                                         className="flex-1 text-white hover:cursor-pointer group"
-                                    // disabled={images.some((img) => !img.uploaded)}
+                                        disabled={images.some((img) => !img.uploaded)}
                                     >
                                         {uploading ? (
                                             <>

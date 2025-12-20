@@ -8,7 +8,6 @@ import { User } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
-import { FaStar } from "react-icons/fa";
 
 export default function AuthToggle() {
     const [open, setOpen] = useState(false);
