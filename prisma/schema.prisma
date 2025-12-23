@@ -7,37 +7,80 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ==========================
+// ENUMS
+// ==========================
 enum UserRole {
-  ADMIN
-  MANAGER
   USER
+  COMPANY_OWNER
+  ADMIN
 }
 
-// ========== USERS ==========
+enum CarStatus {
+  AVAILABLE
+  RENTED
+  MAINTENANCE
+}
+
+enum RentalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  NOT_PAID
+  PAID
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+  SEMI_AUTOMATIC
+}
+
+// ==========================
+// USER
+// ==========================
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
+  email         String?    @unique
+  emailVerified DateTime?
   image         String?
   password      String?
-  role          UserRole  @default(USER)
-  status        String    @default("Inactive")
+  role          UserRole   @default(USER)
+  status        UserStatus @default(ACTIVE)
 
-  accounts Account[]
-
-  createdAt     DateTime       @default(now())
+  // relations
+  accounts      Account[]
   profile       Profile?
+  company       Company?
   orders        Order[]
   notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+// ==========================
+// ACCOUNT (NextAuth)
+// ==========================
 model Account {
   id                String  @id @default(cuid())
-  userId            String  @map("user_id")
+  userId            String
   type              String
   provider          String
-  providerAccountId String  @map("provider_account_id")
+  providerAccountId String
   refresh_token     String? @db.Text
   access_token      String? @db.Text
   expires_at        Int?
@@ -49,122 +92,146 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@map("accounts")
 }
 
+// ==========================
+// PROFILE
+// ==========================
 model Profile {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   phoneNumber   String?
   streetAddress String?
   city          String?
   postalCode    String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ========== CATEGORY ==========
+// ==========================
+// COMPANY
+// ==========================
+model Company {
+  id       String  @id @default(cuid())
+  name     String
+  logo     String?
+  phone    String
+  address  String?
+  city     String
+  verified Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  ownerId String  @unique
+  owner   User    @relation(fields: [ownerId], references: [id])
+  cars    Car[]
+  orders  Order[]
+}
+
+// ==========================
+// CATEGORY
+// ==========================
 model Category {
   id   String @id @default(cuid())
   name String @unique
 
-  itemsCars ItemsCars[]
+  cars Car[]
 }
 
-// ========== MODELS ==========
+// ==========================
+// MODEL (CAR MODEL)
+// ==========================
 model Model {
   id   String @id @default(cuid())
   name String @unique
 
-  itemsCars ItemsCars[]
+  cars Car[]
 }
 
-model ItemsCars {
-  id           String   @id @default(cuid())
+// ==========================
+// CAR
+// ==========================
+model Car {
+  id           String       @id @default(cuid())
   name         String
   description  String?
-  price        Float
+  pricePerDay  Float
   year         Int
   engine       String
   horsepower   Int
-  quantity     Float    @default(0)
-  discount     Float?   @default(0)
-  status       String   @default("available")
-  version      String   @default("Occasion")
-  transmission String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  transmission Transmission @default(SEMI_AUTOMATIC)
+  status       CarStatus    @default(AVAILABLE)
 
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
   categoryId String?
-  model      Model?    @relation(fields: [modelId], references: [id], onDelete: Cascade)
-  modelId    String?
+  category   Category? @relation(fields: [categoryId], references: [id])
 
-  imagesOnCars ImagesOnCars[]
+  modelId String?
+  model   Model?  @relation(fields: [modelId], references: [id])
+
+  images ImagesOnCars[]
+  orders Order[]
 }
 
-// ========== IMAGES ITEMS-CARS ==========
+// ==========================
+// CAR IMAGES
+// ==========================
 model ImagesOnCars {
-  id        String    @id @default(cuid())
-  imageUrl  String
-  productId String
-  itemsCars ItemsCars @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id       String @id @default(cuid())
+  imageUrl String
+
+  carId String
+  car   Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
 }
 
-// ========== ORDERS ==========
+// ==========================
+// ORDER (RENTAL)
+// ==========================
 model Order {
-  id              String   @id @default(cuid())
-  orderNumber     String   @unique
-  userId          String?
-  customerName    String
-  phoneNumber     String
-  country         String
-  customerEmail   String
-  subtotal        Float
-  tax             Float?
-  shipping        Float?
-  total           Float
-  shippingAddress String?
-  isPaid          String?  @default("Not Paid")
-  status          String?  @default("processing")
-  paymentMethod   String   @default("Cash on Delivery")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String        @id @default(cuid())
+  startDate     DateTime
+  endDate       DateTime
+  totalDays     Int
+  totalPrice    Float
+  status        RentalStatus  @default(PENDING)
+  paymentStatus PaymentStatus @default(NOT_PAID)
 
-  // Relations
-  user  User?       @relation(fields: [userId], references: [id])
-  items OrderItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  carId String
+  car   Car    @relation(fields: [carId], references: [id])
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
 }
 
+// ==========================
+// NOTIFICATION
+// ==========================
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  message   String
-  read      Boolean  @default(false)
+  id      String  @id @default(cuid())
+  title   String
+  message String
+  read    Boolean @default(false)
+
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-// ========== ORDERS ITEM==========
-model OrderItem {
-  id          String   @id @default(cuid())
-  orderId     String
-  productId   String
-  name        String
-  description String?
-  price       Float
-  quantity    Int
-  discount    Float    @default(0)
-  image       String?
-  category    String?
-  model       String?
-  subtotal    Float
-  createdAt   DateTime @default(now())
-
-  // Relations
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

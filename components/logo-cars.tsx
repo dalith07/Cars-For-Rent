@@ -140,7 +140,7 @@ export default function InfiniteLogoSlider() {
             onMouseLeave={handleMouseLeave}
         >
             {/* 🔁 Seamless logo row */}
-            <div ref={rowRef} className="logo-row flex gap-14 relative z-10">
+            <div ref={rowRef} className="logo-row relative flex gap-14 z-10">
                 {[...images, ...images].map((src, i) => (
                     <Image
                         width={100}
@@ -151,7 +151,10 @@ export default function InfiniteLogoSlider() {
                         className="md:w-24 w-16 hover:cursor-pointer h-24 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)]"
                     />
                 ))}
+
             </div>
+            <div className="pointer-events-none absolute left-0 top-0 h-full w-24 bg-linear-to-r from-black to-transparent z-20" />
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-24 bg-linear-to-l from-black to-transparent z-20" />
         </div>
     );
 }

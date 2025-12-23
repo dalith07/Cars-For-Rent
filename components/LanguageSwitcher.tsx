@@ -39,9 +39,9 @@ export default function LanguageSwitcher() {
             {/* Globe Button */}
             <button
                 onClick={() => setOpen(!open)}
-                className="p-2 cursor-pointer rounded-full border border-white/20 bg-white/5 hover:bg-white/10 transition"
+                className="md:p-4 p-3 cursor-pointer rounded-full border border-white/20 bg-white/20 hover:bg-white/10 text-gray-300 duration-500"
             >
-                <Globe className="text-primary" />
+                <Globe className="w-5 h-5 md:w-6 md:h-6" />
             </button>
 
             {/* Dropdown */}

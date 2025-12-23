@@ -1,4 +1,4 @@
-export const ARTICLE_PER_PAGE = 8;
+export const ARTICLE_PER_PAGE = 12;
 
 export const PRODUCTION_DOMAIN = "https://cloud-hosting-cyan.vercel.app";
 export const DEVELOPMENT_DOMAIN = "http://localhost:3000";

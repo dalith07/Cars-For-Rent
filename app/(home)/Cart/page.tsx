@@ -35,7 +35,7 @@ export default function CartPage() {
     const router = useRouter()
     const { items, removeItem, updateQuantity, clearCart, getTotalPrice } = useCart()
 
-    // (Temporary mock for orders context)
+    // console.log("😍😉😉", items)
     const { refreshOrderCount } = useOrders()
 
     const user = useCurrentUser();
@@ -47,7 +47,6 @@ export default function CartPage() {
             //   setPhoneNumber(user.. || "");
         }
     }, [user]);
-
 
     const [isCheckingOut, setIsCheckingOut] = useState(false)
     const [customerName, setCustomerName] = useState("")
@@ -239,6 +238,7 @@ export default function CartPage() {
                                                                     >
                                                                         <Plus className="h-3 w-3" />
                                                                     </Button>
+
                                                                     <span className="text-xs text-muted-foreground ml-2">
                                                                         Max: {item.quantity}
                                                                     </span>
@@ -359,6 +359,7 @@ export default function CartPage() {
                                     </CardContent>
                                 </Card>
 
+                                {/* Order Summary */}
                                 <Card className="bg-white/10 border-white/20">
                                     <CardHeader>
                                         <CardTitle className="text-white">Order Summary</CardTitle>

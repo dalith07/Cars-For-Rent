@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Recursive } from "next/font/google"
+import { Recursive } from "next/font/google";
 import "./globals.css"
 import { Suspense } from "react"
 import SessionWrapper from "@/components/SessionWrapper"
@@ -15,8 +15,12 @@ const recursive = Recursive({
 
 export const metadata: Metadata = {
   title: "speed cars",
-  description: "Created with v0",
-  generator: "v0.app",
+  description: "Created With Nextjs",
+  generator: "test",
+  icons: [
+    {
+      url: "/cars/bmw_m5_competition_1.png",
+    },]
 };
 
 export default function RootLayout({

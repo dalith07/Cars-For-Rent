@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Search, Loader2, Timer, CalendarDays } from "lucide-react";
+import { ShoppingCart, Search, Loader2, Timer, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { ItemsCarsWithAlll } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ARTICLE_PER_PAGE } from "@/lib/constants";
@@ -36,6 +36,8 @@ export default function ItemsCarsClient({ cars }: Props) {
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [search, setSearch] = useState<string>("");
     const [loading, setLoading] = useState(false);
+
+    console.log(filteredCars)
 
     // pagination
     const [pagination, setPagination] = useState<PaginationInfo>({
@@ -146,7 +148,7 @@ export default function ItemsCarsClient({ cars }: Props) {
             </section>
 
             {/* Car grid */}
-            <div ref={containerRef} className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div ref={containerRef} className="max-w-7xl mx-auto grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {loading ? (
                     <div className="col-span-full flex justify-center items-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -170,7 +172,7 @@ export default function ItemsCarsClient({ cars }: Props) {
                             */}
                             <span
                                 className={`
-                                absolute text-center top-6 z-50 translate-x-46 -translate-y-1
+                                absolute text-center top-6 z-40 translate-45 translate-y-0
                                 rotate-45 text-sm w-38 py-1
                                 transition-all duration-700
                                 opacity-30 group-hover:opacity-100  
@@ -191,7 +193,7 @@ export default function ItemsCarsClient({ cars }: Props) {
                                             src={car.imagesOnCars[0].imageUrl}
                                             alt={car.name}
                                             fill
-                                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                            className="object-cover transition-transform duration-500 group-hover:scale-125"
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-gray-800 flex items-center justify-center">
@@ -238,7 +240,7 @@ export default function ItemsCarsClient({ cars }: Props) {
                                                         name: car.model?.name ?? "Unknown",
                                                     },
 
-                                                    quantity: car.quantity ?? 0,
+                                                    quantity: car.quantity,
                                                     description: car.description,
                                                 } as any)
                                             }
@@ -275,11 +277,9 @@ export default function ItemsCarsClient({ cars }: Props) {
                                 variant="outline"
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
-                                className="flex items-center gap-2 bg-transparent px-6"
+                                className="flex items-center gap-2 px-6"
                             >
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                </svg>
+                                <ChevronLeft size={24} />
                                 Previous
                             </Button>
 
@@ -293,12 +293,10 @@ export default function ItemsCarsClient({ cars }: Props) {
                                 variant="outline"
                                 onClick={() => handlePageChange(pagination.currentPage + 1)}
                                 disabled={pagination.currentPage === pagination.totalPages}
-                                className="flex items-center gap-2 bg-transparent px-6"
+                                className="flex items-center gap-2 px-6"
                             >
                                 Next
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                                <ChevronRight size={24} />
                             </Button>
                         </div>
                     </div>

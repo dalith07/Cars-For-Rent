@@ -63,7 +63,7 @@ const Hero = () => {
     };
 
     return (
-        <section className="relative w-full h-screen flex items-center justify-center overflow-hidden">
+        <section className="relative bg-black/10 backdrop-blur-md w-full h-screen flex items-center justify-center overflow-hidden">
 
             {/* Background Image */}
             <div ref={bgRef} className="absolute inset-0 z-0">
@@ -80,7 +80,7 @@ const Hero = () => {
             <div className="absolute inset-0 bg-black/30 z-10"></div>
 
             {/* Bottom Blur Overlay */}
-            <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-black/10 to-transparent backdrop-blur-sm z-10"></div>
+            {/* <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-black/10 to-transparent backdrop-blur-sm z-10"></div> */}
 
             {/* Main Content */}
             <div className="relative z-20 max-w-6xl text-center px-6 text-white">
@@ -121,6 +121,9 @@ const Hero = () => {
                     className="object-contain"
                 />
             </div>
+
+            {/* <div className="pointer-events-none absolute left-0 bottom-0 h-32 w-24 bg-linear-to-t from-black to-transparent z-20" /> */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-blue-100/30 to-transparent z-20" />
         </section>
     );
 };

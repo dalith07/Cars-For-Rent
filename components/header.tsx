@@ -94,7 +94,7 @@ export default function Header() {
             <nav className="container mx-auto sm:px-2 px-4 py-4 flex items-center justify-between">
                 {/* LOGO NAV-BAR */}
                 <div>
-                    <Link href={"/"} className="text-white text-lg font-bold">
+                    <Link href={"/"} className="text-white text-sm md:text-lg font-bold">
                         <span ref={titleRef} className="inline-block">
                             {texts[currentTextIndex]}
                         </span>
@@ -107,7 +107,7 @@ export default function Header() {
                         <Link
                             href="/"
                             className={clsx(
-                                "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3 text-xs",
+                                "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3",
                                 pathname === "/" ? "text-blue-500" : "hover:text-blue-500 text-white"
                             )}
                         >
@@ -118,7 +118,7 @@ export default function Header() {
                         <Link
                             href="/market-cars"
                             className={clsx(
-                                "inline-flex text-white items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3 text-xs",
+                                "inline-flex text-white items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3 ",
                                 pathname === "/MarketCars" ? "text-blue-500" : "hover:text-blue-500 text-white"
                             )}
                         >
@@ -129,7 +129,7 @@ export default function Header() {
                         <Link
                             href="/Service"
                             className={clsx(
-                                "inline-flex text-white items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3 text-xs",
+                                "inline-flex text-white items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3",
                                 pathname === "/Service" ? "text-blue-500" : "hover:text-blue-500"
                             )}
                         >
@@ -141,7 +141,7 @@ export default function Header() {
                         <Link
                             href="/your-orders"
                             className={clsx(
-                                "inline-flex text-white items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50  h-8 rounded-md px-3 text-xs relative",
+                                "inline-flex text-white items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50  h-8 rounded-md px-3 relative",
                                 pathname === "/UserOrdres" ? "text-blue-500" : "hover:text-blue-500"
                             )}
                         >
@@ -152,7 +152,7 @@ export default function Header() {
                             Your Orders
                         </Link>
 
-                        <Link
+                        {/* <Link
                             href="/notifications"
                             className={clsx(
                                 "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3 text-xs",
@@ -161,24 +161,29 @@ export default function Header() {
                         >
                             <MessagesSquare className="mr-1 w-5 h-5" />
                             Notification
-                        </Link>
+                        </Link> */}
                     </div>
                 </div>
 
                 {/* CARD & LANGUAGE */}
                 <div className="hidden md:flex items-center gap-4">
-                    <button className="relative p-4 rounded-full border hover:cursor-pointer border-white/20 bg-white/5 hover:bg-white/10 transition">
-                        <Link href="/Cart" className="text-blue-500">
+                    <Link href="/Cart" >
+                        <button className="relative text-blue-500 p-4 rounded-full border hover:cursor-pointer border-blue-500/20 bg-blue-500/20 duration-500 hover:bg-blue-500/10">
                             <ShoppingCart size={20} />
                             <span className="absolute -top-2 -right-1 bg-blue-500 text-white rounded-full text-[14px] w-6 h-6 flex items-center justify-center">
                                 {totalItems > 0 ? <>{totalItems}</> : <>0</>}
                             </span>
-                        </Link>
-                    </button>
+                        </button>
+                    </Link>
 
-                    {/* <button className="p-4 cursor-pointer rounded-full border border-white/20 bg-white/5 hover:bg-white/10 transition">
-                        <Globe className="text-primary" />
-                    </button> */}
+                    <Link href="/Cart" >
+                        <button className="relative text-primary p-4 rounded-full border hover:cursor-pointer border-yellow-500/20 bg-yellow-500/20 duration-500 hover:bg-yellow-500/10">
+                            <MessagesSquare size={20} />
+                            <span className="absolute -top-2 -right-1 bg-yellow-500 text-white rounded-full text-[14px] w-6 h-6 flex items-center justify-center">
+                                {/* {totalItems > 0 ? <>{totalItems}</> : <>0</>} */}0
+                            </span>
+                        </button>
+                    </Link>
 
                     <LanguageSwitcher />
 
@@ -189,18 +194,24 @@ export default function Header() {
 
                 {/* Mobile Top Bar */}
                 <div className="flex md:hidden items-center gap-3 justify-end">
-                    {/* Cart */}
-                    <Link
-                        href="/Cart"
-                        className="relative p-2 border border-white/20 rounded-full bg-white/5 hover:bg-white/10 transition"
-                    >
-                        <ShoppingCart size={20} className="text-blue-500" />
-                        <span className="absolute -top-2 -right-1 bg-blue-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                            {totalItems > 0 ? <>{totalItems}</> : <>0</>}
-                        </span>
+                    <Link href="/Cart" >
+                        <button className="relative text-blue-500 p-3 rounded-full border hover:cursor-pointer border-blue-500/20 bg-blue-500/20 duration-500 hover:bg-blue-500/10">
+                            <ShoppingCart size={20} />
+                            <span className="absolute -top-2 -right-1 bg-blue-500 text-white rounded-full text-[14px] w-6 h-6 flex items-center justify-center">
+                                {totalItems > 0 ? <>{totalItems}</> : <>0</>}
+                            </span>
+                        </button>
                     </Link>
 
-                    {/* Language */}
+                    <Link href="/Cart" >
+                        <button className="relative text-primary p-3 rounded-full border hover:cursor-pointer border-yellow-500/20 bg-yellow-500/20 duration-500 hover:bg-yellow-500/10">
+                            <MessagesSquare size={20} />
+                            <span className="absolute -top-2 -right-1 bg-yellow-500 text-white rounded-full text-[14px] w-6 h-6 flex items-center justify-center">
+                                {/* {totalItems > 0 ? <>{totalItems}</> : <>0</>} */}0
+                            </span>
+                        </button>
+                    </Link>
+
                     <LanguageSwitcher />
 
                     {/* Mobile Menu Button */}
@@ -265,24 +276,27 @@ export default function Header() {
 
                     <div className="flex flex-col gap-2 pt-4 border-t border-primary/20">
                         {user ?
-                            <div className="flex  gap-4 items-center justify-center ">
-                                {
-                                    user.role === "ADMIN" && <Link href={"/dashboard"}>
-                                        <Button className="bg-yellow-700 hover:bg-none hover:cursor-pointer text-white">Dashboard</Button>
+                            <div className="flex flex-col gap-2 w-full">
+                                <div className="flex gap-4">
+                                    <Link href={"/settings"} className="w-1/2">
+                                        <Button variant="outline" className="w-full hover:cursor-pointer text-black">Settings</Button>
+                                    </Link>
+
+                                    <Button variant="destructive" className="w-1/2 over:cursor-pointer" onClick={() => signOut()}>Logout</Button>
+                                </div>
+
+                                {user.role === "ADMIN" &&
+                                    <Link href={"/dashboard"} className="m-1/2">
+                                        <Button className="w-full bg-yellow-700 hover:bg-yellow-700/70 duration-500 hover:cursor-pointer text-white">Dashboard</Button>
                                     </Link>
                                 }
-
-                                <Link href={"/settings"}>
-                                    <Button variant="outline" className="hover:cursor-pointer text-black">Settings</Button>
-                                </Link>
-
-                                <Button variant="destructive" className="hover:cursor-pointer" onClick={() => signOut()}>Logout</Button>
-                            </div> :
+                            </div>
+                            :
                             <div className="flex gap-2 w-full">
                                 <Link href="/auth/login" className="w-1/2">
                                     <Button
                                         variant="outline"
-                                        className="w-full hover:cursor-pointer border-primary text-primary hover:bg-primary/10"
+                                        className="w-full hover:cursor-pointer border-primary text-primary hover:text-primary bg-black/10 hover:bg-black/20 duration-500"
                                         onClick={playSound}
                                     >
                                         Login
@@ -291,7 +305,7 @@ export default function Header() {
 
                                 <Link href="/auth/register" className="w-1/2">
                                     <Button
-                                        className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground"
+                                        className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground duration-500"
                                         onClick={playSound}
                                     >
                                         Register
