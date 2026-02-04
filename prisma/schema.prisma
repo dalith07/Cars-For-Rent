@@ -48,33 +48,92 @@ enum Transmission {
   SEMI_AUTOMATIC
 }
 
-// ==========================
+enum NotificationType {
+  ORDER
+  PAYMENT
+  ALERT
+}
+
+enum CompanyStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  BLOCKED
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  SEEN
+}
+
+enum LogType {
+  INFO
+  WARN
+  ERROR
+}
+
+enum SetupStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  type      LogType
+  message   String
+  details   Json? // optional, for extra info like errors or user actions
+  createdAt DateTime @default(now())
+}
+
 // USER
-// ==========================
 model User {
   id            String     @id @default(cuid())
   name          String?
   email         String?    @unique
-  emailVerified DateTime?
+  emailVerified DateTime?  @map("email_verified")
   image         String?
   password      String?
   role          UserRole   @default(USER)
   status        UserStatus @default(ACTIVE)
 
-  // relations
+  isOnline Boolean   @default(false)
+  lastSeen DateTime?
+
   accounts      Account[]
   profile       Profile?
   company       Company?
   orders        Order[]
   notifications Notification[]
+  messages      Message[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // 👇 العلاقات الصحيحة
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 }
 
-// ==========================
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  status MessageStatus @default(SENT)
+
+  senderId   String
+  receiverId String
+
+  sender   User    @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User    @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  user     User?   @relation(fields: [userId], references: [id])
+  userId   String?
+}
+
 // ACCOUNT (NextAuth)
-// ==========================
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -94,9 +153,7 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-// ==========================
 // PROFILE
-// ==========================
 model Profile {
   id            String  @id @default(cuid())
   phoneNumber   String?
@@ -111,31 +168,60 @@ model Profile {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ==========================
 // COMPANY
-// ==========================
 model Company {
   id       String  @id @default(cuid())
   name     String
+  email    String
   logo     String?
   phone    String
-  address  String?
   city     String
-  verified Boolean @default(false)
+  address  String
+  lat      Float?
+  lng      Float?
+  location String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // ✅ BANK INFO
+  description String?
+  bankName    String?
+  bankAccount String?
+  bankHolder  String?
 
-  // relations
-  ownerId String  @unique
-  owner   User    @relation(fields: [ownerId], references: [id])
-  cars    Car[]
-  orders  Order[]
+  // ✅ LEGAL INFO
+  registrationNumber String?
+  documentUrl        String?
+
+  // ✅ SETTINGS
+  status         CompanyStatus @default(PENDING)
+  setupCompleted Boolean       @default(false)
+
+  settings CompanySettings? @relation(fields: [companySettingsId], references: [id], onDelete: Cascade)
+
+  ownerId String @unique
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  cars   Car[]
+  orders Order[]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  companySettingsId String?
 }
 
-// ==========================
+model CompanySettings {
+  id String @id @default(cuid())
+
+  emailNotifications   Boolean @default(true)
+  orderNotifications   Boolean @default(true)
+  paymentNotifications Boolean @default(true)
+  marketingEmails      Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  companies Company[]
+}
+
 // CATEGORY
-// ==========================
 model Category {
   id   String @id @default(cuid())
   name String @unique
@@ -143,9 +229,7 @@ model Category {
   cars Car[]
 }
 
-// ==========================
 // MODEL (CAR MODEL)
-// ==========================
 model Model {
   id   String @id @default(cuid())
   name String @unique
@@ -153,40 +237,38 @@ model Model {
   cars Car[]
 }
 
-// ==========================
 // CAR
-// ==========================
 model Car {
   id           String       @id @default(cuid())
   name         String
   description  String?
   pricePerDay  Float
+  stock        Int          @default(1)
+  discount     Float?       @default(0)
   year         Int
   engine       String
   horsepower   Int
-  transmission Transmission @default(SEMI_AUTOMATIC)
+  transmission Transmission @default(MANUAL)
   status       CarStatus    @default(AVAILABLE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // relations
   companyId String
-  company   Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   modelId String?
-  model   Model?  @relation(fields: [modelId], references: [id])
+  model   Model?  @relation(fields: [modelId], references: [id], onDelete: Cascade)
 
-  images ImagesOnCars[]
-  orders Order[]
+  images    ImagesOnCars[]
+  orders    Order[]
+  orderCars OrderCar[]
 }
 
-// ==========================
 // CAR IMAGES
-// ==========================
 model ImagesOnCars {
   id       String @id @default(cuid())
   imageUrl String
@@ -195,40 +277,58 @@ model ImagesOnCars {
   car   Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
 }
 
-// ==========================
 // ORDER (RENTAL)
-// ==========================
 model Order {
-  id            String        @id @default(cuid())
-  startDate     DateTime
-  endDate       DateTime
-  totalDays     Int
-  totalPrice    Float
+  id          String @id @default(cuid())
+  orderNumber String @unique
+
+  startDate  DateTime
+  endDate    DateTime
+  totalDays  Int
+  totalPrice Float
+
   status        RentalStatus  @default(PENDING)
   paymentStatus PaymentStatus @default(NOT_PAID)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // relations
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  carId String
-  car   Car    @relation(fields: [carId], references: [id])
-
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
+
+  orderCars OrderCar[]
+  car       Car?       @relation(fields: [carId], references: [id])
+  carId     String?
 }
 
-// ==========================
+model OrderCar {
+  id String @id @default(cuid())
+
+  orderId String
+  carId   String
+
+  pricePerDay Float
+  discount    Float? @default(0)
+
+  days       Int
+  totalPrice Float
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  car   Car   @relation(fields: [carId], references: [id])
+
+  @@unique([orderId, carId])
+}
+
 // NOTIFICATION
-// ==========================
 model Notification {
-  id      String  @id @default(cuid())
+  id      String           @id @default(cuid())
+  type    NotificationType
   title   String
   message String
-  read    Boolean @default(false)
+  read    Boolean          @default(false)
 
   createdAt DateTime @default(now())
 

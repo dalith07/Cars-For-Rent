@@ -15,8 +15,11 @@ export const LoginSchema = z.object({
 });
 
 export const ProfileSchema = z.object({
-  phoneNumber: z.string().min(4).optional().or(z.literal("")),
-  streetAddress: z.string().min(4).optional().or(z.literal("")),
-  city: z.string().min(4).optional().or(z.literal("")),
-  postalCode: z.string().min(4).optional().or(z.literal("")),
+  phoneNumber: z.string().optional(),
+  streetAddress: z.string().optional(),
+  postalCode: z.string().optional(),
+  city: z.string().optional(),
+  image: z.string().optional(), // 🔥 مهم
 });
+
+export type ProfileSchemaType = z.infer<typeof ProfileSchema>;

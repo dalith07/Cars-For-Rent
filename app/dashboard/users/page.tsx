@@ -4,7 +4,6 @@ import { getAllUsers } from "@/data/user";
 
 export default async function Users() {
     const users = await getAllUsers();
-    // console.log("USERS:😍😍😍😍😍", users);
 
     return <UsersPage usersItems={users} />;
 }

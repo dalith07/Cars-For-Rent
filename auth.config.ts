@@ -8,6 +8,7 @@ import Google from "next-auth/providers/google";
 
 export default {
   trustHost: true,
+
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -17,23 +18,60 @@ export default {
       clientId: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
     }),
+    // Credentials({
+    //   async authorize(credentials) {
+    //     const validatedFields = LoginSchema.safeParse(credentials);
+
+    //     if (validatedFields.success) {
+    //       const { email, password } = validatedFields.data;
+
+    //       const user = await getUserByEmail(email);
+    //       if (!user || !user.password) return null;
+
+    //       const passwordMatch = await bcrypt.compare(password, user.password);
+    //       if (passwordMatch) return user;
+    //     }
+
+    //     return null;
+    //   },
+    // }),
+
     Credentials({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+
       async authorize(credentials) {
         const validatedFields = LoginSchema.safeParse(credentials);
+        if (!validatedFields.success) return null;
 
-        if (validatedFields.success) {
-          const { email, password } = validatedFields.data;
+        const { email, password } = validatedFields.data;
 
-          const user = await getUserByEmail(email);
-          if (!user || !user.password) return null;
+        const user = await getUserByEmail(email);
+        if (!user || !user.password) return null;
 
-          const passwordMatch = await bcrypt.compare(password, user.password);
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) return null;
 
-          if (passwordMatch) return user;
-        }
-
-        return null;
+        // ✅ رجّع user clean object
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          companyId: user.company?.id,
+        };
       },
     }),
   ],
+  // callbacks: {
+  //   async session({ session, user }) {
+  //     if (session.user) {
+  //       session.user.id = user.id;
+  //     }
+  //     return session;
+  //   },
+  // },
 } satisfies NextAuthConfig;

@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { CarWithAll } from "@/lib/utils";
 
 interface CarItemInput {
   name: string;
@@ -9,104 +11,113 @@ interface CarItemInput {
   engine: string;
   horsepower: string;
   transmission: string;
-  price: number;
+  pricePerDay: number;
   year: number;
-  quantity: string;
-  discount: string;
+  stock: string;
+  discount?: string;
   status: string;
-  version: string;
+
   categoryName: string;
-  categoryId: string;
   modelName: string;
   modelId: string;
-  imagesOnCars: { imageUrl: string }[];
+
+  images: { imageUrl: string }[];
 }
 
 export async function createCarItem(data: CarItemInput) {
   try {
+    // Validate required fields
     if (
       !data.name ||
-      !data.price ||
+      !data.pricePerDay ||
       !data.engine ||
       !data.categoryName ||
       !data.modelName ||
-      !data.quantity ||
-      !data.discount ||
+      !data.stock ||
       !data.status ||
-      !data.version ||
       !data.horsepower ||
       !data.transmission
     ) {
       throw new Error("Missing required fields");
     }
 
-    // Check uniqueness by name (id is generated)
-    // const exist = await prisma.itemsCars.findFirst({
-    //   where: { name: data.name },
-    // });
+    // Get session
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
 
-    // if (exist) {
-    //   throw new Error("Car with this name already exists");
-    // }
+    // Fetch company owned by this user
+    const company = await prisma.company.findFirst({
+      where: { ownerId: session.user.id },
+    });
+
+    if (!company) throw new Error("No company found for this user");
+
+    // Upsert category to get its ID
+    const category = await prisma.category.upsert({
+      where: { name: data.categoryName },
+      update: {},
+      create: { name: data.categoryName },
+    });
+
+    // Upsert model to get its ID
+    const model = await prisma.model.upsert({
+      where: { name: data.modelName },
+      update: {},
+      create: { name: data.modelName },
+    });
 
     const horsepowerValue =
-      data.horsepower === "Custom" || data.horsepower.trim() === ""
-        ? 0
-        : parseInt(data.horsepower);
+      data.horsepower === "Custom" ? 0 : parseInt(data.horsepower);
 
-    const quantityValue =
-      data.quantity && data.quantity.trim() !== ""
-        ? parseFloat(data.quantity)
-        : 1;
+    const statusEnum: Record<string, "AVAILABLE" | "RENTED" | "MAINTENANCE"> = {
+      available: "AVAILABLE",
+      rented: "RENTED",
+      maintenance: "MAINTENANCE",
+    };
 
-    const discountValue =
-      data.discount && data.discount.trim() !== ""
-        ? parseFloat(data.discount)
-        : 0;
+    const transmissionEnum: Record<
+      string,
+      "MANUAL" | "AUTOMATIC" | "SEMI_AUTOMATIC"
+    > = {
+      manual: "MANUAL",
+      automatic: "AUTOMATIC",
+      semi_automatic: "SEMI_AUTOMATIC",
+      auto: "AUTOMATIC", // alias
+    };
 
-    const carItem = await prisma.itemsCars.create({
+    // Create car
+    const carItem = await prisma.car.create({
       data: {
         name: data.name,
         description: data.description || "",
-        price: data.price,
-        year: data.year || 2025,
+        pricePerDay: data.pricePerDay,
+        year: data.year,
         engine: data.engine || "Not specified",
-        quantity: quantityValue,
-        discount: discountValue,
-        status: data.status || "available",
-        version: data.version || "new",
-        horsepower: horsepowerValue || 0,
-        transmission: data.transmission || "auto",
-        category: {
-          connectOrCreate: {
-            where: { name: data.categoryName || data.categoryId },
-            create: {
-              name: data.categoryName || data.categoryId || "Uncategorized",
-            },
-          },
-        },
-        model: {
-          connectOrCreate: {
-            where: { name: data.modelName || data.modelId },
-            create: { name: data.modelName || data.modelId || "Generic" },
-          },
-        },
-        imagesOnCars: {
-          create: data.imagesOnCars
-            .filter((img) => img.imageUrl && img.imageUrl.trim() !== "")
-            .map((img) => ({
-              imageUrl: img.imageUrl,
-            })),
+        stock: parseFloat(data.stock),
+        discount: parseFloat(data.discount || "0"),
+        status: statusEnum[data.status.toLowerCase()] as any,
+        transmission: transmissionEnum[data.transmission.toLowerCase()] as any,
+        horsepower: horsepowerValue,
+
+        companyId: company.id,
+        categoryId: category.id,
+        modelId: model.id,
+
+        images: {
+          create: data.images
+            .filter((img) => img.imageUrl.trim() !== "")
+            .map((img) => ({ imageUrl: img.imageUrl })),
         },
       },
       include: {
-        imagesOnCars: true,
+        images: true,
         category: true,
         model: true,
+        orders: true,
       },
     });
 
-    console.log("CreateCarItem Received Data❤️:", data);
+    // console.log("Car Added Successfully ❤️", carItem);
 
     return { success: true, data: carItem };
   } catch (error: any) {
@@ -118,6 +129,7 @@ export async function createCarItem(data: CarItemInput) {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
 interface CarItemUpdateInput {
   id: string;
   name: string;
@@ -125,33 +137,31 @@ interface CarItemUpdateInput {
   engine: string;
   horsepower: string;
   transmission: string;
-  price: number;
+  pricePerDay: number;
   year: number;
-  quantity: string;
-  discount: string;
+  stock: string;
+  discount?: string;
   status: string;
-  version: string;
 
   categoryId: string;
   categoryName: string;
   modelName: string;
   modelId: string;
 
-  imagesOnCars: { imageUrl: string }[];
+  images: { imageUrl: string }[];
 }
 
 export async function updateCarItem(data: CarItemUpdateInput) {
   try {
     if (
       !data.name ||
-      !data.price ||
+      !data.pricePerDay ||
       !data.engine ||
       !data.categoryName ||
       !data.modelName ||
-      !data.quantity ||
+      !data.stock ||
       !data.discount ||
       !data.status ||
-      !data.version ||
       !data.horsepower ||
       !data.transmission
     ) {
@@ -159,7 +169,7 @@ export async function updateCarItem(data: CarItemUpdateInput) {
     }
 
     // Get the current car to check if name has changed
-    const currentCar = await prisma.itemsCars.findUnique({
+    const currentCar = await prisma.car.findUnique({
       where: { id: data.id },
       select: { name: true },
     });
@@ -171,7 +181,7 @@ export async function updateCarItem(data: CarItemUpdateInput) {
     // Only check for duplicate name if the name is actually changing
     const nameChanged = currentCar.name !== data.name;
     if (nameChanged) {
-      const existingByName = await prisma.itemsCars.findFirst({
+      const existingByName = await prisma.car.findFirst({
         where: { name: data.name },
       });
 
@@ -180,21 +190,51 @@ export async function updateCarItem(data: CarItemUpdateInput) {
       }
     }
 
+    // Upsert category to get its ID
+    // const category = await prisma.category.upsert({
+    //   where: { name: data.categoryName },
+    //   update: {},
+    //   create: { name: data.categoryName },
+    // });
+
+    // Upsert model to get its ID
+    // const model = await prisma.model.upsert({
+    //   where: { name: data.modelName },
+    //   update: {},
+    //   create: { name: data.modelName },
+    // });
+
+    const statusEnum: Record<string, "AVAILABLE" | "RENTED" | "MAINTENANCE"> = {
+      available: "AVAILABLE",
+      rented: "RENTED",
+      maintenance: "MAINTENANCE",
+    };
+
+    const transmissionEnum: Record<
+      string,
+      "MANUAL" | "AUTOMATIC" | "SEMI_AUTOMATIC"
+    > = {
+      manual: "MANUAL",
+      automatic: "AUTOMATIC",
+      semi_automatic: "SEMI_AUTOMATIC",
+      auto: "AUTOMATIC", // alias
+    };
+
     const horsepowerValue =
       data.horsepower === "Custom" ? 0 : parseInt(data.horsepower);
 
     // Build update data conditionally
     const updateData: any = {
       description: data.description,
-      price: data.price,
+      pricePerDay: data.pricePerDay,
       year: data.year,
       engine: data.engine,
-      quantity: data.quantity ? parseFloat(data.quantity) : 0,
+      stock: data.stock ? parseFloat(data.stock) : 0,
       discount: data.discount ? parseFloat(data.discount) : 0,
-      status: data.status,
-      version: data.version,
+      status: statusEnum[data.status.toLowerCase()] as any,
       horsepower: horsepowerValue,
-      transmission: data.transmission,
+      transmission: transmissionEnum[data.transmission.toLowerCase()] as any,
+
       category: {
         connectOrCreate: {
           where: { name: data.categoryName },
@@ -207,9 +247,10 @@ export async function updateCarItem(data: CarItemUpdateInput) {
           create: { name: data.modelName },
         },
       },
-      imagesOnCars: {
+
+      images: {
         deleteMany: {},
-        create: data.imagesOnCars.map((img) => ({ imageUrl: img.imageUrl })),
+        create: data.images.map((img) => ({ imageUrl: img.imageUrl })),
       },
     };
 
@@ -218,13 +259,13 @@ export async function updateCarItem(data: CarItemUpdateInput) {
       updateData.name = data.name;
     }
 
-    const updatedCar = await prisma.itemsCars.update({
+    const updatedCar = await prisma.car.update({
       where: { id: data.id },
       data: updateData,
       include: {
         category: true,
         model: true,
-        imagesOnCars: true,
+        images: true,
       },
     });
 
@@ -247,26 +288,59 @@ export async function updateCarItem(data: CarItemUpdateInput) {
   }
 }
 
-export async function getCarItems() {
+// =================== USER (GET CAR ITEMS) SHOW IN MARKET CARS  ===================
+export async function getCarItems(): Promise<CarWithAll[]> {
   try {
-    const cars = await prisma.itemsCars.findMany({
+    return await prisma.car.findMany({
       orderBy: { createdAt: "desc" },
       include: {
         category: true,
         model: true,
-        imagesOnCars: true,
+        images: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            logo: true,
+          },
+        },
       },
     });
+  } catch (error) {
+    console.error("❌ Error fetching car items:", error);
+    return [];
+  }
+}
 
-    // console.log("✅ Successfully fetched cars:", cars.length);
-    // if (cars.length > 0) {
-    //   console.log("🖼️ First car images:", cars[0]?.imagesOnCars);
-    // }
+export async function getCarItemsByCompany() {
+  try {
+    // 1️⃣ احصل على session
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
+
+    // 2️⃣ احصل على الشركة الخاصة بالمستخدم
+    const company = await prisma.company.findFirst({
+      where: { ownerId: session.user.id },
+    });
+    if (!company) throw new Error("No company found for this user");
+
+    // 3️⃣ جلب سيارات هذه الشركة فقط
+    const cars = await prisma.car.findMany({
+      where: { companyId: company.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        category: true,
+        model: true,
+        images: true,
+        orders: true,
+        company: true,
+      },
+    });
 
     return cars;
   } catch (error: any) {
     console.error("❌ Error fetching car items:", error);
-    return []; // Return empty array instead of error object
+    return [];
   }
 }
 
@@ -274,12 +348,19 @@ export async function getCarItemById(id: string) {
   try {
     if (!id) throw new Error("Car ID is required");
 
-    const car = await prisma.itemsCars.findUnique({
+    const car = await prisma.car.findUnique({
       where: { id },
       include: {
         category: true,
         model: true,
-        imagesOnCars: true,
+        images: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            logo: true,
+          },
+        },
       },
     });
 
@@ -299,7 +380,7 @@ export async function deleteCarItem(id: string) {
     if (!id) throw new Error("Car ID is required");
 
     // 1. Find the car first
-    const car = await prisma.itemsCars.findUnique({
+    const car = await prisma.car.findUnique({
       where: { id },
       select: { modelId: true, categoryId: true },
     });
@@ -307,13 +388,13 @@ export async function deleteCarItem(id: string) {
     if (!car) throw new Error("Car not found");
 
     // 2. Delete the car
-    await prisma.itemsCars.delete({
+    await prisma.car.delete({
       where: { id },
     });
 
     // 3. If model has no more cars → delete model
     if (car.modelId) {
-      const count = await prisma.itemsCars.count({
+      const count = await prisma.car.count({
         where: { modelId: car.modelId },
       });
 
@@ -326,7 +407,7 @@ export async function deleteCarItem(id: string) {
 
     // 4. If category has no more cars → delete category
     if (car.categoryId) {
-      const count = await prisma.itemsCars.count({
+      const count = await prisma.car.count({
         where: { categoryId: car.categoryId },
       });
 
@@ -361,5 +442,93 @@ export async function deleteImageCarItemById(id: string) {
       success: false,
       message: error.message || "Failed to delete image",
     };
+  }
+}
+
+export async function getTotalCars() {
+  try {
+    const count = await prisma.car.count();
+    return count;
+  } catch (error: any) {
+    console.error("❌ Error counting cars:", error);
+    return 0;
+  }
+}
+
+export async function getCarsGrowthFromLastWeek() {
+  try {
+    const now = new Date();
+
+    const startOfThisWeek = new Date();
+    startOfThisWeek.setDate(now.getDate() - 7);
+
+    const startOfLastWeek = new Date();
+    startOfLastWeek.setDate(now.getDate() - 14);
+
+    const thisWeekCount = await prisma.car.count({
+      where: {
+        createdAt: {
+          gte: startOfThisWeek,
+        },
+      },
+    });
+
+    const lastWeekCount = await prisma.car.count({
+      where: {
+        createdAt: {
+          gte: startOfLastWeek,
+          lt: startOfThisWeek,
+        },
+      },
+    });
+
+    if (lastWeekCount === 0) {
+      return { percent: 100, isUp: true };
+    }
+
+    const percent = ((thisWeekCount - lastWeekCount) / lastWeekCount) * 100;
+
+    return {
+      percent: Math.round(percent),
+      isUp: percent >= 0,
+    };
+  } catch (error) {
+    console.error("❌ Error calculating cars growth:", error);
+    return { percent: 0, isUp: true };
+  }
+}
+
+// add function get all cars mahom details al company
+export async function getAllCarsWithCompanyDetails() {
+  try {
+    const cars = await prisma.car.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        category: true,
+        model: true,
+        images: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            logo: true,
+            status: true,
+            createdAt: true,
+            owner: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return cars;
+  } catch (error) {
+    console.error("❌ Error fetching cars with company details:", error);
+    return [];
   }
 }

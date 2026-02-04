@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-import { MoreHorizontal, AlertCircle, ChevronLeft, ChevronRight, Plus, Ellipsis, Delete, Trash, Eye, Trash2 } from "lucide-react"
+import { AlertCircle, ChevronLeft, ChevronRight, Plus, Ellipsis, Delete, Trash, Eye, Trash2 } from "lucide-react"
 import gsap from "gsap"
 import { useEffect, useRef, useState } from "react"
-import Header from "../dashboard/header"
 import { Button } from "../ui/button"
 import Link from "next/link"
-import { ItemsCars } from "@prisma/client"
-import { ItemsCarsWithAll, ItemsCarsWithAlll } from "@/lib/utils"
+import { ItemsCarsWithAlll } from "@/lib/utils"
 import { deleteCarItem } from "@/actions/dashboard/cars"
 
 interface CarItemsProps {
@@ -32,7 +30,7 @@ export default function CarsPage({ carItems }: CarItemsProps) {
         model: item.name,
         year: item.year,
         status: item.status,
-        price: item.price.toString(),
+        price: item.pricePerDay.toString(),
     }));
 
     const totalPages = Math.ceil(cars.length / itemsPerPage)
@@ -140,7 +138,7 @@ export default function CarsPage({ carItems }: CarItemsProps) {
                             <div
                                 className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg ${getStatusColor(car.status)} text-xs font-medium`}
                             >
-                                {car.status === "maintenance" && <AlertCircle className="w-3 h-3" />}
+                                {car.status === "MAINTENANCE" && <AlertCircle className="w-3 h-3" />}
                                 <span className="capitalize">{car.status}</span>
                             </div>
                         </div>

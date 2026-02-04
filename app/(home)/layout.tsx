@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Source_Code_Pro } from "next/font/google";
 
 import Header from "@/components/header";
-import AnimatedBackground from "@/components/animated-background";
 import Footer from "@/components/footer";
 import { Providers } from "@/components/providers";
 import { OrdersProvider } from "@/lib/orders_context";
@@ -23,11 +22,27 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body className={`${sourceCodePro.variable} antialiased`}>
+
+                {/* This runs BEFORE the page renders to set dark/light mode */}
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+      (function () {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    `,
+                    }}
+                />
+
                 <Providers>
-                    <AnimatedBackground />
+                    {/* <AnimatedBackground /> */}
                     <Header />
                     <main>
                         <OrdersProvider>

@@ -146,7 +146,7 @@
 
 "use client";
 
-import { LayoutDashboard, BarChart3, Users, ShoppingCart, Car, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, BarChart3, Users, ShoppingCart, Car, LogOut, Settings, Building2 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -162,6 +162,7 @@ export function AppSidebar({ isOpen, onClose }: SidebarProps) {
         { id: "users", icon: Users, label: "Users", url: "/dashboard/users" },
         { id: "orders", icon: ShoppingCart, label: "Orders", url: "/dashboard/orders" },
         { id: "cars", icon: Car, label: "Cars", url: "/dashboard/cars" },
+        { id: "companys", icon: Building2, label: "Companys", url: "/dashboard/companys" },
         { id: "settings", icon: Settings, label: "Settings", url: "/dashboard/settings" },
     ];
 

@@ -1,0 +1,41 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* :root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.852 0.199 91.936);
+  --ring: oklch(0.852 0.199 91.936);
+}
+
+.dark {
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --primary: oklch(0.795 0.184 86.047);
+  --ring: oklch(0.421 0.095 57.708);
+} */
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+
+  /* BLUE */
+  --primary: oklch(0.62 0.18 250);
+  --ring: oklch(0.62 0.18 250);
+}
+
+.dark {
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+
+  /* BLUE (darker for dark mode) */
+  --primary: oklch(0.68 0.17 250);
+  --ring: oklch(0.55 0.14 250);
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}

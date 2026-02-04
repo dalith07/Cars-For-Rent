@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -45,23 +44,23 @@
 
 :root {
   --radius: 0.65rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.9911 0.0117 99.53);
   --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
+  --card: oklch(0.98 0.005 285.823);
   --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
+  --popover: oklch(0.98 0.005 285.823);
   --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: oklch(0.852 0.199 91.936);
   --primary-foreground: oklch(0.421 0.095 57.708);
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
+  --muted: oklch(0.95 0.003 286.32);
+  --muted-foreground: oklch(0.45 0.01 285.938);
   --accent: oklch(0.967 0.001 286.375);
   --accent-foreground: oklch(0.21 0.006 285.885);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
+  --border: oklch(0.85 0.008 286.32);
+  --input: oklch(0.88 0.006 286.32);
   --ring: oklch(0.852 0.199 91.936);
   --chart-1: oklch(0.905 0.182 98.111);
   --chart-2: oklch(0.795 0.184 86.047);
@@ -74,12 +73,12 @@
   --sidebar-primary-foreground: oklch(0.987 0.026 102.212);
   --sidebar-accent: oklch(0.967 0.001 286.375);
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-border: oklch(0.85 0.008 286.32);
   --sidebar-ring: oklch(0.852 0.199 91.936);
 }
 
 .dark {
-  --background: oklch(0.141 0.005 285.823);
+  --background: #020817;
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
@@ -118,6 +117,41 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Ensure cards are visible in light mode */
+  [data-slot="card"] {
+    @apply bg-card text-card-foreground border-border;
+  }
+
+  /* Ensure text is visible in both modes */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-foreground;
+  }
+
+  /* Better contrast for descriptions */
+  [data-slot="card-description"] {
+    @apply text-muted-foreground;
+  }
+
+  /* Ensure card titles are visible */
+  [data-slot="card-title"] {
+    @apply text-card-foreground;
+  }
+
+  /* Ensure card content text is visible */
+  [data-slot="card-content"] {
+    @apply text-card-foreground;
+  }
+
+  /* Fix borders to be visible in light mode */
+  .border-border {
+    border-color: var(--border);
   }
 }
 
@@ -178,4 +212,157 @@
   background: rgba(255, 255, 255, 0.7);
   border-radius: 10px;
   box-shadow: 0 0 6px white;
+}
+
+/* Custom scrollbar for notifications */
+.notification-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notification-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+
+.notification-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Firefox */
+.notification-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* =============== CHAT SCROLLBAR =============== */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #00a884 #202c33;
+}
+
+/* Chrome / Edge / Safari */
+.chat-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-scroll::-webkit-scrollbar-track {
+  background: #202c33;
+  border-radius: 10px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background-color: #00a884;
+  border-radius: 10px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #029e7d;
+}
+
+/* Falling white stars */
+/* .star {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 0 10px white, 0 0 20px white;
+} */
+
+/* Few subtle primary speed lines */
+/* .neon-speed-line {
+  position: absolute;
+  width: 2px;
+  height: 15px;
+  background-color: theme(colors.primary); 
+  opacity: 0.4;
+  border-radius: 1px;
+  filter: blur(1px);
+} */
+
+/* Fixed white stars */
+.star {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  box-shadow:
+    0 0 10px white,
+    0 0 20px white;
+}
+
+/* Subtle primary color speed lines */
+.neon-speed-line {
+  position: absolute;
+  width: 2px;
+  height: 15px;
+  background-color: theme(colors.primary); /* Tailwind primary */
+  opacity: 0.4;
+  border-radius: 1px;
+  filter: blur(1px);
+}
+
+.blinking-cursor {
+  display: inline-block;
+  width: 1ch;
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  0%,
+  50%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0;
+  }
+}
+
+.google-marker {
+  background: none;
+  border: none;
+}
+
+.gm-pin {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  background: var(--primary);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.gm-pin::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  top: 8px;
+  left: 8px;
+}
+
+.gm-pin-inner {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--primary);
+  border-radius: 50%;
+  top: 11px;
+  left: 11px;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }

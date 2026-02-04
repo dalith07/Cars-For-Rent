@@ -1,22 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// import { UserWithProfile } from "@/lib/utils";
-
-// interface Props {
-//     user: UserWithProfile
-// }
-
-// const ProfileUser = ({ user }: Props) => {
-
-//     return (
-//         <div>
-//             <h1>{user.email}</h1>
-//         </div>
-//     )
-// }
-
-// export default ProfileUser
-
-
 "use client";
 
 import { UserWithProfile } from "@/lib/utils";
@@ -44,10 +26,10 @@ const ProfileUser = ({ user }: Props) => {
     const [imageUrl, setImageUrl] = useState<string | null>(user.image);
 
     // USER PROFILE
-    const [phone, setPhone] = useState<string>(user.Profile?.phoneNumber || "");
-    const [streetAddress, setStreetAddress] = useState<string>(user.Profile?.streetAddress || "");
-    const [postalCode, setPostalCode] = useState<string>(user.Profile?.postalCode || "");
-    const [city, setCity] = useState<string>(user.Profile?.city || "");
+    const [phone, setPhone] = useState<string>(user.profile?.phoneNumber || "");
+    const [streetAddress, setStreetAddress] = useState<string>(user.profile?.streetAddress || "");
+    const [postalCode, setPostalCode] = useState<string>(user.profile?.postalCode || "");
+    const [city, setCity] = useState<string>(user.profile?.city || "");
 
     // HEDAER
     const [sidebarOpen, setSidebarOpen] = useState(true)

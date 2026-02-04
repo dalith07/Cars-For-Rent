@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 
@@ -9,9 +8,9 @@ interface BackButtonProps {
 
 const BackButton = ({ href, label }: BackButtonProps) => {
     return (
-        <Button className="m-auto">
-            <Link href={href}>{label}</Link>
-        </Button>
+        <span className="m-auto text-accent-foreground text-sm hover:underline duration-500">
+            <Link href={href} className="text-accent-foreground">{label}</Link>
+        </span>
     )
 }
 

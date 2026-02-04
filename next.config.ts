@@ -31,7 +31,6 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "lh3.googleusercontent.com", // (Google login images)
       },
-
       // if your API returns from more domains, add them here
     ],
   },

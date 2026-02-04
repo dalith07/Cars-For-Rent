@@ -135,7 +135,7 @@ export default function InfiniteLogoSlider() {
     return (
         <div
             ref={containerRef}
-            className="relative w-full overflow-hidden h-40 flex items-center justify-center"
+            className="relative w-full bg-black/5 backdrop-blur-xs overflow-hidden h-40 flex items-center justify-center"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
@@ -153,8 +153,16 @@ export default function InfiniteLogoSlider() {
                 ))}
 
             </div>
-            <div className="pointer-events-none absolute left-0 top-0 h-full w-24 bg-linear-to-r from-black to-transparent z-20" />
-            <div className="pointer-events-none absolute right-0 top-0 h-full w-24 bg-linear-to-l from-black to-transparent z-20" />
+
+            {/* Left overlay */}
+            <div className="pointer-events-none absolute left-0 top-0 h-full w-24 
+                bg-linear-to-r from-white to-transparent 
+                dark:from-black dark:to-transparent z-20" />
+
+            {/* Right overlay */}
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-24 
+                bg-linear-to-l from-white to-transparent 
+                dark:from-black dark:to-transparent z-20" />
         </div>
     );
 }

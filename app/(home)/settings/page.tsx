@@ -1,163 +1,183 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import gsap from "gsap";
 import Image from "next/image";
-import Dropzone from "react-dropzone";
+import Dropzone, { FileRejection } from "react-dropzone";
 import { toast } from "sonner";
+import { FileImage } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { FileImage } from "lucide-react";
-
 import { useCurrentUser } from "@/hooks/use-current-user";
-import z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { ProfileSchema } from "@/lib/validationSchema";
-import { useForm } from "react-hook-form";
 import { useUploadThing } from "@/lib/uploadthing";
-import { createOrUpdateProfile } from "@/actions/profile";
+import { createOrUpdateProfile, updateUserProfile } from "@/actions/profile";
 import { getUserProfile } from "@/actions/dashboard/users";
+import { Progress } from "@/components/ui/progress";
+import { useSession } from "next-auth/react";
 
 export default function ProfilePage() {
     const containerRef = useRef<HTMLDivElement>(null);
+    const progressRef = useRef<HTMLDivElement>(null);
 
     const user = useCurrentUser();
-    const [userName, setUserName] = useState("");
-    const [email, setEmail] = useState("");
-    const [imageUploadUrl, setImageUploadUrl] = useState<string | null>(null);
-    const [uploadProgress, setUploadProgress] = useState<number>(0);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [isDragOver, setIsDragOver] = useState<boolean>(false);
-
-    const [phone, setPhone] = useState("");
-    const [streetAddress, setStreetAddress] = useState("");
-    const [postalCode, setPostalCode] = useState("");
-    const [city, setCity] = useState("");
-
-    const [error, setError] = useState<string | undefined>("");
-    const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition();
+    const { update } = useSession();
 
-    // const form = useForm<z.infer<typeof ProfileSchema>>({
-    //     resolver: zodResolver(ProfileSchema),
-    // });
+    const form = useForm<z.infer<typeof ProfileSchema>>({
+        resolver: zodResolver(ProfileSchema),
+        defaultValues: {
+            phoneNumber: "",
+            streetAddress: "",
+            postalCode: "",
+            city: "",
+            image: "",
+        },
+    });
 
+    // load profile
     useEffect(() => {
         if (!user?.id) return;
 
-        const loadProfile = async () => {
+        const load = async () => {
             const profile = await getUserProfile(user.id);
 
             if (profile) {
-                // eslint-disable-next-line react-hooks/immutability
                 form.reset({
                     phoneNumber: profile.phoneNumber || "",
                     streetAddress: profile.streetAddress || "",
                     postalCode: profile.postalCode || "",
                     city: profile.city || "",
+                    image: user.image || "",
                 });
             }
+
+            setImagePreview(user.image || null);
         };
 
-        loadProfile();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user?.id,]);
+        load();
+    }, [user?.id]);
 
-    const form = useForm<z.infer<typeof ProfileSchema>>({
-        resolver: zodResolver(ProfileSchema),
-        defaultValues: {
-            phoneNumber: phone,
-            streetAddress: streetAddress,
-            postalCode: postalCode,
-            city: city,
-        },
-    });
-
-    useEffect(() => {
-        if (!user) return;
-
-        setTimeout(() => {
-            setUserName(user.name || "");
-            setEmail(user.email || "");
-            setImageUploadUrl(user.image || null);
-        }, 0);
-    }, [user]);
-
-    useEffect(() => {
+    // page animation
+    useLayoutEffect(() => {
         if (!containerRef.current) return;
 
         const ctx = gsap.context(() => {
-            gsap.from(".anim-item", {
+            gsap.from(".anim", {
                 opacity: 0,
                 y: 40,
                 duration: 0.8,
-                stagger: 0.12,
+                stagger: 0.1,
                 ease: "power3.out",
+                clearProps: "all", // 🔥 مهم برشا
             });
         }, containerRef);
 
-        return () => ctx.revert();
+        return () => ctx.revert(); // 🔥 cleanup
     }, []);
+
+    // progress animation
+    useEffect(() => {
+        if (!progressRef.current) return;
+
+        gsap.to(progressRef.current, {
+            width: `${uploadProgress}%`,
+            duration: 0.4,
+            ease: "power2.out",
+        });
+    }, [uploadProgress]);
 
     const { startUpload } = useUploadThing("imageUploader", {
         onClientUploadComplete: async ([data]) => {
-            setImageUploadUrl(data.ufsUrl);
-            toast.success("Image uploaded successfully!");
+            setImagePreview(data.ufsUrl)
+            form.setValue("image", data.ufsUrl);
             setUploadProgress(0);
+            toast.success("Image uploaded successfully");
         },
-        onUploadProgress(progress) {
-            setUploadProgress(progress);
+        onUploadProgress(p: number) {
+            setUploadProgress(p);
+        }, onUploadError(error) {
+            toast.error("Upload failed: " + error.message);
+            setUploadProgress(0);
         },
     });
 
-    const onDropAccepted = (files: File[]) => {
-        setUploadProgress(1);
-        startUpload(files, {});
+    const onDropAccepted = (acceptedFiles: File[]) => {
+        startUpload(acceptedFiles, { configId: undefined });
     };
 
-    const onDropRejected = () => toast.error("Invalid file format");
+    const onDropRejected = (rejectedFiles: FileRejection[]) => { };
 
-    const handelOnSubmit = (values: z.infer<typeof ProfileSchema>) => {
-        setError("");
-        setSuccess("");
+    const onSubmit = (values: z.infer<typeof ProfileSchema>) => {
+        if (!user?.id) return;
 
-        if (!user?.id) {
-            setError("User not found.");
-            return;
-        }
         startTransition(() => {
-            createOrUpdateProfile(values, user.id).then((data) => {
-                setError(data?.error);
-                setSuccess(data?.success);
+            updateUserProfile(values, user.id).then(async (res) => {
+                if (res?.error) {
+                    toast.error(res.error);
+                    return;
+                }
+
+                if (res?.success) {
+                    // 🔥 update session
+                    await update({
+                        image: values.image,
+                    });
+
+                    setImagePreview(values.image || null);
+                    toast.success(res.success);
+                }
             });
         });
+        console.log("NEW IMAGE:😍😍", values.image);
+        console.log("SESSION IMAGE😍😍:😍😍", user?.image);
+        // startTransition(() => {
+        //     createOrUpdateProfile(values, user.id).then(async (res) => {
+        //         if (res?.error) toast.error(res.error);
+        //         if (res?.success) toast.success(res.success);
+        //         // if (res?.success) {
+        //         //     await update(); // 🔥 يحدّث user.image في session
+        //         //     toast.success(res.success);
+        //         // }
+        //     });
+        // });
     };
+
 
 
     return (
         <div
             ref={containerRef}
-            className="min-h-screen mt-32 flex items-center justify-center m-4 md:m-0"
+            className="min-h-screen mt-12 flex justify-center items-center"
         >
-            <div className="anim-item w-full max-w-4xl bg-white/5 backdrop-blur-md rounded-3xl border border-white/20 shadow-[0_0_35px_rgba(0,0,0,0.45)] p-10">
-                <h1 className="text-4xl font-semibold text-center text-white mb-10 tracking-wide">
-                    User Profile
+            <div className="anim w-full max-w-4xl p-10 rounded-3xl bg-primary/20 border-primary/20 dark:bg-background  border dark:border-accent">
+                <h1 className="anim text-4xl text-accent-foreground font-semibold text-center mb-10">
+                    Profile
                 </h1>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {/* Avatar + Upload */}
-                    <div className="flex flex-col items-center gap-5">
-                        <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg">
+                <div className="grid md:grid-cols-2 gap-12">
+                    {/* IMAGE */}
+                    <div className="anim flex flex-col items-center gap-4">
+                        <div className="w-40 h-40 rounded-full overflow-hidden border-3 border-primary/50">
                             <Image
-                                src={imageUploadUrl || "/logo-mini.png"}
-                                width={200}
-                                height={200}
+                                src={imagePreview || "/logo_user.png"}
                                 alt="Profile"
-                                className="object-cover"
+                                width={160}
+                                height={160}
+                                className="object-cover select-none"
                             />
                         </div>
 
+                        {/* UPLOAD LOGO */}
                         <Dropzone
                             accept={{ "image/*": [".png", ".jpg", ".jpeg", ".webp"] }}
                             onDropAccepted={onDropAccepted}
@@ -168,78 +188,76 @@ export default function ProfilePage() {
                             {({ getRootProps, getInputProps }) => (
                                 <div
                                     {...getRootProps()}
-                                    className={`border-2 border-dashed rounded-xl p-4 w-56 text-center cursor-pointer transition 
-                  ${isDragOver ? "border-blue-400 bg-blue-900/20" : "border-gray-500/60 text-gray-300"}`}
+                                    className={`anim-item p-3 text-sm rounded-lg text-center cursor-pointer transition
+                                   ${isDragOver ? "border-blue-400 bg-blue-800/30" : "border-gray-400"}`}
                                 >
                                     <input {...getInputProps()} />
-                                    {uploadProgress > 0 ? (
-                                        <Progress value={uploadProgress} className="w-full h-2" />
-                                    ) : (
-                                        <span className="flex items-center gap-2 justify-center font-medium">
-                                            <FileImage className="w-5 h-5" /> Upload Image
-                                        </span>
-                                    )}
+                                    <span className="block border border-dashed border-primary rounded-lg p-2 mt-2 text-center cursor-pointer font-semibold">
+                                        {uploadProgress > 0 ? (
+                                            <div className="w-full">
+                                                <Progress
+                                                    value={uploadProgress}
+                                                    className="my-2 w-24 h-2 bg-gray-300"
+                                                />
+                                                <p className="text-xs text-accent-foreground mt-1">{uploadProgress}%</p>
+                                            </div>
+                                        ) : (
+                                            <span className="flex flex-row items-center text-accent-foreground gap-2">
+                                                <FileImage className="text-primary" /> Uplaod Image
+                                            </span>
+                                        )}
+                                    </span>
                                 </div>
                             )}
                         </Dropzone>
                     </div>
 
-                    {/* Form */}
-                    <div className="flex flex-col gap-3">
-                        <form onSubmit={form.handleSubmit(handelOnSubmit)} className="flex flex-col space-y-4">
-                            <Input
-                                className="bg-white/10 border-white/20 text-white"
-                                placeholder="Full name"
-                                value={userName}
-                                disabled
-                                onChange={(e) => setUserName(e.target.value)}
-                            />
+                    {/* FORM */}
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="anim flex flex-col gap-4"
+                    >
+                        <Input
+                            disabled
+                            value={user?.name || ""}
+                            className="bg-primary/30 border-primary/30 dark:bg-accent text-accent-foreground"
+                        />
 
-                            <Input
-                                className="bg-white/10 border-white/20 text-white"
-                                placeholder="Email"
-                                type="email"
-                                value={email}
-                                disabled
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
+                        <Input
+                            disabled
+                            value={user?.email || ""}
+                            className="bg-primary/30 border-primary/30 dark:bg-accent text-accent-foreground"
+                        />
 
-                            <Input
-                                {...form.register("phoneNumber")}
-                                className="bg-white/10 border-white/20 text-white"
-                                placeholder="Phone number"
-                            />
+                        <Input
+                            {...form.register("phoneNumber")}
+                            placeholder="Phone number"
+                            className="bg-primary/30 border-primary/30 dark:bg-accent text-accent-foreground"
+                        />
 
-                            <Input
-                                {...form.register("streetAddress")}
-                                className="bg-white/10 border-white/20 text-white"
-                                placeholder="Street address"
-                            />
+                        <Input
+                            {...form.register("streetAddress")}
+                            placeholder="Street address"
+                            className="bg-primary/30 border-primary/30 dark:bg-accent text-accent-foreground"
+                        />
 
-                            <Input
-                                {...form.register("postalCode")}
-                                className="bg-white/10 border-white/20 text-white"
-                                placeholder="Postal Code"
-                            />
+                        <Input
+                            {...form.register("postalCode")}
+                            placeholder="Postal code"
+                            className="bg-primary/30 border-primary/30 dark:bg-accent text-accent-foreground"
+                        />
 
-                            <Input
-                                {...form.register("city")}
-                                className="bg-white/10 border-white/20 text-white"
-                                placeholder="City"
-                            />
+                        <Input
+                            {...form.register("city")}
+                            placeholder="City"
+                            className="bg-primary/30 border-primary/30 dark:bg-accent text-accent-foreground"
+                        />
 
-                            <Button
-                                type="submit"
-                                className="bg-blue-600 hover:cursor-pointer text-white hover:bg-blue-500 w-full py-6 rounded-xl text-lg font-semibold"
-                                disabled={isPending}
-                            >
-                                Save Changes
-                            </Button>
-                        </form>
-
-                        {error && <p className="text-red-500 bg-red-500/30 p-2 rounded-lg text-sm">{error}</p>}
-                        {success && <p className="text-green-500 bg-green-500/30 p-2 rounded-lg text-sm">{success}</p>}
-                    </div>
+                        <Button disabled={isPending}
+                            className="py-5 hover:cursor-pointer text-lg text-accent">
+                            Save changes
+                        </Button>
+                    </form>
                 </div>
             </div>
         </div>

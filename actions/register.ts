@@ -29,13 +29,16 @@ export async function register(values: z.infer<typeof RegisterSchema>) {
       name,
       email,
       password: hashedPassword,
+      status: "ACTIVE",
+      role: "USER",
     },
   });
 
   await signIn("credentials", {
     email,
     password,
-    redirectTo: DEFAULT_LOGIN_REDIRECT,
+    // redirectTo: DEFAULT_LOGIN_REDIRECT,
+    redirect: false,
   });
 
   return { success: "Confirmation Email sent!" };

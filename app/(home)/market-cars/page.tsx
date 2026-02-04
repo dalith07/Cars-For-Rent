@@ -1,5 +1,5 @@
 import { getCarItems } from "@/actions/dashboard/cars";
-import ItemsCarsClient from "./ItemsCars"
+import ItemsCarsClient from "./ItemsCars";
 
 const MarketPlace = async () => {
     const cars = await getCarItems();
@@ -8,7 +8,7 @@ const MarketPlace = async () => {
         <div>
             <ItemsCarsClient cars={cars} />
         </div>
-    )
-}
+    );
+};
 
-export default MarketPlace
+export default MarketPlace;

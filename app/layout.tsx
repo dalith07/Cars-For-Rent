@@ -29,20 +29,37 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <SessionWrapper>
-      <html lang="en" className={recursive.className} suppressHydrationWarning>
-        <body>
+
+    <html lang="en" className={recursive.className} suppressHydrationWarning>
+      <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('theme');
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <SessionWrapper>
           <CartProvider>
             <main className="flex flex-col min-h-[calc(100vh-3.5rem-1px)]">
               <Suspense fallback={<Loading />}>
-                {/* <Toaster richColors position="bottom-right" /> */}
                 {children}
                 <Toaster position="bottom-right" richColors={true} />
               </Suspense>
             </main>
           </CartProvider>
-        </body>
-      </html>
-    </SessionWrapper>
+        </SessionWrapper>
+      </body>
+    </html>
+
   )
 }

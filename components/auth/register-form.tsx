@@ -77,14 +77,14 @@ export default function RegisterPage() {
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-gray-300">Name</FormLabel>
+                                <FormLabel className="text-accent-foreground text-sm">Name:</FormLabel>
                                 <FormControl>
                                     <Input
                                         {...field}
                                         type="text"
                                         placeholder="John Doe"
                                         disabled={isPending}
-                                        className="bg-gray-700 border-gray-600 text-white"
+                                        className="bg-blue-600/10 border-blue-600/50 text-white focus:border-blue-600/70 duration-500 transition-colors pr-10"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -98,14 +98,14 @@ export default function RegisterPage() {
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-gray-300">Email</FormLabel>
+                                <FormLabel className="text-accent-foreground text-sm">Email:</FormLabel>
                                 <FormControl>
                                     <Input
                                         {...field}
                                         type="email"
                                         placeholder="john.doe@example.com"
                                         disabled={isPending}
-                                        className="bg-gray-700 border-gray-600 text-white"
+                                        className="bg-blue-600/10 border-blue-600/50 text-white focus:border-blue-600/70 duration-500 transition-colors pr-10"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -119,14 +119,14 @@ export default function RegisterPage() {
                         name="password"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-gray-300">Password</FormLabel>
+                                <FormLabel className="text-accent-foreground text-sm">Password:</FormLabel>
                                 <FormControl>
                                     <Input
                                         {...field}
                                         type="password"
                                         placeholder="********"
                                         disabled={isPending}
-                                        className="bg-gray-700 border-gray-600 text-white"
+                                        className="bg-blue-600/10 border-blue-600/50 text-white focus:border-blue-600/70 duration-500 transition-colors pr-10"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -142,8 +142,7 @@ export default function RegisterPage() {
                     <Button
                         type="submit"
                         disabled={isPending}
-                        className="w-full hover:cursor-pointer bg-blue-600 hover:bg-blue-500 text-white"
-                    >
+                        className="w-full hover:cursor-pointer bg-blue-600/70 hover:bg-blue-600/50 hover:text-white border-blue-600  border duration-500 text-white">
                         Create an account
                     </Button>
                 </form>

@@ -1,10 +1,14 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { UserRole, UserStatus } from "@prisma/client";
 
 export const getUserByEmail = async (email: string) => {
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { company: true },
+    });
 
     return user;
   } catch {
@@ -12,63 +16,53 @@ export const getUserByEmail = async (email: string) => {
   }
 };
 
-// export const getUserById = async (id: string) => {
-//   try {
-//     const user = await prisma.user.findUnique({
-//       where: { id },
-//       select: {
-//         id: true,
-//         email: true,
-//         emailVerified: true,
-//         role: true,
-//         password: true,
-//         name: true,
-//         image: true,
-//         profile: true,
-//         status: true,
-//         createdAt: true,
-//       },
-//     });
-
-//     return user;
-//   } catch {
-//     return null;
-//   }
-// };
-
 export const getUserById = async (id: string) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        email: true,
-        emailVerified: true,
-        role: true,
-        password: true,
-        name: true,
-        image: true,
-        status: true,
-        createdAt: true,
-        profile: true, // Prisma field
-      },
-    });
+  const user = await prisma.user.findUnique({
+    where: { id },
+    include: {
+      profile: true,
+      company: true,
+    },
+  });
 
-    if (!user) return null;
-
-    return {
-      ...user,
-      Profile: user.profile, // rename to match type
-    };
-  } catch {
-    return null;
-  }
+  return user;
 };
 
 export const getAllUsers = async () => {
-  const users = await prisma.user.findMany();
+  const users = await prisma.user.findMany({
+    include: {
+      company: true,
+    },
+  });
   return users;
 };
+
+interface UpdateUserInput {
+  userId: string;
+  role: UserRole;
+  status: UserStatus;
+}
+
+export async function updateUserRoleAndStatus({
+  userId,
+  role,
+  status,
+}: UpdateUserInput) {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        role,
+        status,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Update user error:", error);
+    return { success: false, error: "Failed to update user" };
+  }
+}
 
 export const deleteUserById = async (id: string) => {
   try {

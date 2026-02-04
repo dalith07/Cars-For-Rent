@@ -1,10 +1,11 @@
 import {
+  Car,
   Category,
+  Company,
   ImagesOnCars,
-  ItemsCars,
   Model,
   Order,
-  OrderItem,
+  OrderCar,
   Profile,
   User,
 } from "@prisma/client";
@@ -17,23 +18,90 @@ export function cn(...inputs: ClassValue[]) {
 
 // export type UserWithProfile = User & { Profile: Profile };
 
-export type UserWithProfile = User & { Profile: Profile | null };
-
-export type ItemsCarsWithAll = ItemsCars & {
-  category: Category;
-  model: Model;
-  imagesOnCars: ImagesOnCars[];
+export type UserWithProfile = User & {
+  profile?: Profile | null;
+  company?: Company | null;
 };
 
-export type ItemsCarsWithAlll = ItemsCars & {
+export type UserWithCompany = User & {
+  company?: Company | null;
+};
+
+export type ItemsCarsWithAll = Car & {
+  category: Category;
+  model: Model;
+  images: ImagesOnCars[];
+};
+
+export type ItemsCarsWithAlll = Car & {
   category: Category | null;
   model: Model | null;
-  imagesOnCars: ImagesOnCars[];
+  images: ImagesOnCars[];
+};
+
+export type CompnayWithCarItemsAll = Company & {
+  category: Category;
+  model: Model;
+  car: Car;
+
+  images: ImagesOnCars[];
+};
+
+export type CompanyWithCarsAndRelations = Company & {
+  cars: (Car & {
+    category: Category;
+    model: Model;
+    images: ImagesOnCars[];
+  })[];
 };
 
 export type OrderWithAll = Order & {
-  items: OrderItem[];
+  items: Order[];
   user: User | null;
+};
+
+export type CarWithAll = Car & {
+  model: { id: string; name: string } | null;
+  category: { id: string; name: string } | null;
+  images: { id: string; imageUrl: string }[];
+
+  company: {
+    id: string;
+    name: string;
+    logo: string | null;
+  };
+};
+
+export type CompanyWithAll = Company & {
+  owner: User & { role: string };
+  cars: CarWithAll[];
+  orders: Order[];
+  verified: boolean;
+  role?: string;
+};
+
+export type OrderItem = Order & {
+  user: User & {
+    profile: Profile | null;
+  };
+  car: Car | null;
+  orderCars: (OrderCar & {
+    car: Car | null;
+  })[];
+};
+
+export type Message = {
+  id: string;
+  content: string;
+  senderId: string;
+  sender?: {
+    id: string;
+    role: "USER" | "ADMIN";
+    isOnline?: boolean;
+    lastSeen?: string;
+  };
+  status: "SENT" | "DELIVERED" | "SEEN";
+  createdAt: string;
 };
 
 // export const models = [

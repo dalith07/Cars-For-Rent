@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -8,17 +6,31 @@ import { gsap } from "gsap";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Search, Loader2, Timer, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import { ItemsCarsWithAlll } from "@/lib/utils";
+import { GiHorseHead } from "react-icons/gi";
+import {
+    ShoppingCart,
+    Search,
+    Loader2,
+    ChevronLeft,
+    ChevronRight,
+} from "lucide-react";
+import { CarWithAll } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { ARTICLE_PER_PAGE } from "@/lib/constants";
 import { useCart } from "@/lib/cart_context";
+import { CARS_PER_PAGE } from "@/lib/constants";
+import { FaCalendarDays } from "react-icons/fa6";
 
 interface Props {
-    cars: ItemsCarsWithAlll[];
+    cars: CarWithAll[];
 }
 
 interface PaginationInfo {
@@ -32,94 +44,83 @@ export default function ItemsCarsClient({ cars }: Props) {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const { addItem } = useCart();
 
-    const [filteredCars, setFilteredCars] = useState<ItemsCarsWithAlll[]>(cars);
-    const [selectedCategory, setSelectedCategory] = useState<string>("all");
-    const [search, setSearch] = useState<string>("");
-    const [loading, setLoading] = useState(false);
+    const [filteredCars, setFilteredCars] = useState<CarWithAll[]>(cars);
+    const [selectedCategory, setSelectedCategory] = useState("all");
+    const [search, setSearch] = useState("");
+    const [loading] = useState(false);
 
-    console.log(filteredCars)
-
-    // pagination
     const [pagination, setPagination] = useState<PaginationInfo>({
         currentPage: 1,
         totalPages: 1,
         totalCount: cars.length,
-        pageSize: ARTICLE_PER_PAGE,
+        pageSize: CARS_PER_PAGE,
     });
 
-    // categories
     const categories = Array.from(
         new Map(
-            cars
-                .filter((c) => c.category)
-                .map((c) => [c.category!.id, c.category!])
+            cars.filter(c => c.category).map(c => [c.category!.id, c.category!])
         ).values()
     );
 
-    // Filter cars by category and search
     useEffect(() => {
-        let updatedCars = [...cars];
+        let updated = [...cars];
 
         if (selectedCategory !== "all") {
-            updatedCars = updatedCars.filter((c) => c.category?.id === selectedCategory);
+            updated = updated.filter(c => c.category?.id === selectedCategory);
         }
 
-        if (search.trim() !== "") {
+        if (search.trim()) {
             const s = search.toLowerCase();
-            updatedCars = updatedCars.filter((c) => c.name.toLowerCase().includes(s));
+            updated = updated.filter(c => c.name.toLowerCase().includes(s));
         }
 
-        const totalCount = updatedCars.length;
+        const totalCount = updated.length;
         const totalPages = Math.ceil(totalCount / pagination.pageSize);
         const start = (pagination.currentPage - 1) * pagination.pageSize;
-        const end = start + pagination.pageSize;
 
-        setPagination((prev) => ({ ...prev, totalCount, totalPages }));
-        setFilteredCars(updatedCars.slice(start, end));
-    }, [selectedCategory, search, pagination.currentPage, cars]);
+        setPagination(p => ({ ...p, totalCount, totalPages }));
+        setFilteredCars(updated.slice(start, start + pagination.pageSize));
+    }, [selectedCategory, search, pagination.currentPage, cars, pagination.pageSize]);
 
-    // Animate cars on filter change
     useEffect(() => {
-        if (filteredCars.length > 0 && containerRef.current) {
-            gsap.fromTo(
-                containerRef.current.querySelectorAll(".car-card"),
-                { opacity: 0, y: 40, scale: 0.9 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    stagger: 0.1,
-                    duration: 0.6,
-                    ease: "power3.out",
-                }
-            );
-        }
+        if (!containerRef.current) return;
+        gsap.fromTo(
+            containerRef.current.querySelectorAll(".car-card"),
+            { opacity: 0, y: 40, scale: 0.95 },
+            {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                stagger: 0.08,
+                duration: 0.6,
+                ease: "power3.out",
+            }
+        );
     }, [filteredCars]);
 
-    // Handle page change
-    const handlePageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= pagination.totalPages) {
-            setPagination((prev) => ({ ...prev, currentPage: newPage }));
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        }
+    const handlePageChange = (page: number) => {
+        if (page < 1 || page > pagination.totalPages) return;
+        setPagination(p => ({ ...p, currentPage: page }));
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     return (
-        <div className="min-h-screen p-4 mt-32">
-            <section className="text-center mb-8">
-                <h1 className="text-4xl md:text-5xl font-bold text-white">
-                    Explore Our <span className="text-yellow-500">Cars</span> Collection
+        <div className="min-h-screen p-4 mt-32 bg-background text-foreground">
+            {/* Title */}
+            <section className="text-center mb-10">
+                <h1 className="text-4xl md:text-5xl font-bold">
+                    Explore Our <span className="text-primary">Cars</span> Collection
                 </h1>
 
                 {/* Filters */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-                    <Select onValueChange={setSelectedCategory} value={selectedCategory}>
-                        <SelectTrigger className="w-40 bg-white/10 border-white/20 text-white">
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger className="w-44 bg-background/60 border-border">
                             <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Categories</SelectItem>
-                            {categories.map((cat) => (
+                            {categories.map(cat => (
                                 <SelectItem key={cat.id} value={cat.id}>
                                     {cat.name}
                                 </SelectItem>
@@ -128,133 +129,118 @@ export default function ItemsCarsClient({ cars }: Props) {
                     </Select>
 
                     <form
-                        onSubmit={(e) => {
+                        onSubmit={e => {
                             e.preventDefault();
-                            setPagination((prev) => ({ ...prev, currentPage: 1 }));
+                            setPagination(p => ({ ...p, currentPage: 1 }));
                         }}
                         className="flex gap-2"
                     >
                         <Input
                             placeholder="Search by car title..."
-                            className="w-64 bg-white/10 border-white/20 text-white"
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={e => setSearch(e.target.value)}
+                            className="w-64 bg-background/60 border-border"
                         />
-                        <Button type="submit" className="text-white hover:cursor-pointer">
+                        <Button type="submit" variant="outline">
                             <Search className="h-4 w-4 mr-2" /> Search
                         </Button>
                     </form>
                 </div>
             </section>
 
-            {/* Car grid */}
-            <div ref={containerRef} className="max-w-7xl mx-auto grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {/* Grid */}
+            <div
+                ref={containerRef}
+                className="max-w-7xl mx-auto grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            >
                 {loading ? (
-                    <div className="col-span-full flex justify-center items-center py-12">
+                    <div className="col-span-full flex justify-center py-20">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        <span className="ml-2 text-gray-300">Loading cars...</span>
                     </div>
                 ) : filteredCars.length === 0 ? (
-                    <p className="text-white col-span-full text-center">No cars found.</p>
+                    <p className="col-span-full text-center text-muted-foreground">
+                        No cars found.
+                    </p>
                 ) : (
-                    filteredCars.map((car) => (
+                    filteredCars.map(car => (
                         <Card
                             key={car.id}
-                            className="group relative bg-gray-900/60
-                            border border-gray-700 hover:border-yellow-400
-                            transition-all duration-300 hover:shadow-yellow-500/20
-                            hover:shadow-xl overflow-hidden rounded-2xl"
+                            className="car-card group relative overflow-hidden rounded-2xl
+                                bg-slate-100 dark:bg-card/70 border-border backdrop-blur
+                                hover:border-primary/50 transition-all duration-300"
                         >
-                            {/* 
-                                group-hover:-translate-y-1
-                                group-hover:translate-x-46
-                                translate-x-80
-                            */}
-                            <span
-                                className={`
-                                absolute text-center top-6 z-40 translate-45 translate-y-0
-                                rotate-45 text-sm w-38 py-1
-                                transition-all duration-700
-                                opacity-30 group-hover:opacity-100  
-                                ${car.status === "available"
-                                        ? "bg-green-100 text-green-800"
-                                        : car.status === "rented"
-                                            ? "bg-red-100 text-red-800"
-                                            : "bg-yellow-100 text-yellow-800"
-                                    }`}
-                            >
-                                {car.status.charAt(0).toUpperCase() + car.status.slice(1)}
-                            </span>
-
-                            <CardContent className="p-0 ">
-                                <div className="relative w-full h-56 overflow-hidden group">
-                                    {car.imagesOnCars && car.imagesOnCars.length > 0 && car.imagesOnCars[0]?.imageUrl ? (
+                            <CardContent className="p-0">
+                                <div className="relative h-56">
+                                    {car.images?.[0]?.imageUrl ? (
                                         <Image
-                                            src={car.imagesOnCars[0].imageUrl}
+                                            src={car.images[0].imageUrl}
                                             alt={car.name}
                                             fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-125"
+                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
                                         />
                                     ) : (
-                                        <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                                            <span className="text-gray-500 text-sm">No image available</span>
+                                        <div className="h-full flex items-center justify-center text-muted-foreground">
+                                            No image
                                         </div>
                                     )}
-                                    <h2 className="absolute bottom-3 left-4 text-xl font-bold text-white pointer-events-none">
+                                    <h2 className="absolute bottom-3 bg-primary/40 px-2 left-4 text-xl font-bold text-black dark:text-white drop-shadow">
                                         {car.name}
                                     </h2>
                                 </div>
 
-                                <div className="p-4 space-y-2">
-                                    <div className="flex justify-between text-sm text-gray-300">
-                                        <Badge variant="outline" className="text-white bg-white/10 border-white/20">{car.category?.name}</Badge>
-                                        <span>{car.year}</span>
+                                <div className="p-4 space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <Badge variant="outline">{car.category?.name}</Badge>
+                                        <span className="text-sm text-muted-foreground">
+                                            {car.year}
+                                        </span>
                                     </div>
 
                                     <div className="flex justify-between items-center">
-                                        <span className="text-lg font-semibold text-cyan-400">
-                                            {(car.price ?? 0)
-                                                .toString()
-                                                .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}{" "}
-                                            DT/ Day <CalendarDays className="inline-flex text-amber-100 animate-bounce" size={"20"} />
+                                        <span className="font-semibold inline-flex gap-2 items-center">
+                                            {car.pricePerDay} TND/Day
+                                            <FaCalendarDays className="text-primary" />
                                         </span>
-                                        <span className="text-sm text-gray-400">{car.horsepower} HP</span>
+                                        <span className="text-sm inline-flex gap-1 items-center">
+                                            <GiHorseHead className="text-primary" /> {car.horsepower} HP
+                                        </span>
                                     </div>
 
-                                    <div className="flex gap-2 mt-4">
+                                    <div className="flex gap-2 pt-2">
                                         <Button
-                                            className="flex-1 text-white hover:cursor-pointer"
+                                            className="flex-1 hover:cursor-pointer"
+                                            disabled={car.status !== "AVAILABLE"}
+                                            // onClick={() =>
+                                            //     addItem({
+                                            //         id: car.id,
+                                            //         name: car.name,
+                                            //         pricePerDay: car.pricePerDay,
+                                            //         discount: car.discount ?? 0,
+                                            //         images: car.images ?? [],
+                                            //     } as any)
+                                            // }
+                                            // onClick={() => addItem(car, 1)}
                                             onClick={() =>
-                                                addItem({
-                                                    id: car.id,
-                                                    name: car.name,
-                                                    price: car.price,
-                                                    discount: car.discount ?? 0,
-                                                    imagesOnCars: car.imagesOnCars ?? [],
-                                                    category: {
-                                                        id: car.category?.id ?? "unknown",
-                                                        name: car.category?.name ?? "Unknown",
+                                                addItem(
+                                                    {
+                                                        ...car,
+                                                        category: car.category ?? { id: "unknown", name: "Unknown" },
+                                                        model: car.model ?? { id: "unknown", name: "Unknown" },
+                                                        images: (car.images ?? []).map(img => ({
+                                                            ...img,
+                                                            carId: car.id, // <-- add the missing property
+                                                        })),
                                                     },
-                                                    model: {
-                                                        id: car.model?.id ?? "unknown",
-                                                        name: car.model?.name ?? "Unknown",
-                                                    },
-
-                                                    quantity: car.quantity,
-                                                    description: car.description,
-                                                } as any)
+                                                    1
+                                                )
                                             }
                                         >
-                                            <ShoppingCart className="h-4 w-4 mr-2 animate-bounce" />
+                                            <ShoppingCart className="h-4 w-4 mr-2" />
                                             Add to Cart
                                         </Button>
 
                                         <Link href={`/market-cars/${car.id}`}>
-                                            <Button
-                                                variant="outline"
-                                                className="hover:cursor-pointer">
-                                                View Details
-                                            </Button>
+                                            <Button variant="outline" className="hover:cursor-pointer">Details</Button>
                                         </Link>
                                     </div>
                                 </div>
@@ -266,40 +252,26 @@ export default function ItemsCarsClient({ cars }: Props) {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-                <div className="mt-12 pt-8">
-                    <div className="flex flex-col items-center justify-center gap-4">
-                        <div className="text-sm text-gray-400 text-center">
-                            Page {pagination.currentPage} of {pagination.totalPages}
-                        </div>
+                <div className="mt-14 flex justify-center items-center gap-4">
+                    <Button
+                        variant="outline"
+                        disabled={pagination.currentPage === 1}
+                        onClick={() => handlePageChange(pagination.currentPage - 1)}
+                    >
+                        <ChevronLeft />
+                    </Button>
 
-                        <div className="flex items-center gap-4">
-                            <Button
-                                variant="outline"
-                                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                                disabled={pagination.currentPage === 1}
-                                className="flex items-center gap-2 px-6"
-                            >
-                                <ChevronLeft size={24} />
-                                Previous
-                            </Button>
+                    <span className="font-medium">
+                        {pagination.currentPage} / {pagination.totalPages}
+                    </span>
 
-                            <div className="flex items-center gap-2 px-4 text-white">
-                                <span className="text-lg font-semibold">{pagination.currentPage}</span>
-                                <span className="text-gray-400">of</span>
-                                <span className="text-lg font-semibold">{pagination.totalPages}</span>
-                            </div>
-
-                            <Button
-                                variant="outline"
-                                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                                disabled={pagination.currentPage === pagination.totalPages}
-                                className="flex items-center gap-2 px-6"
-                            >
-                                Next
-                                <ChevronRight size={24} />
-                            </Button>
-                        </div>
-                    </div>
+                    <Button
+                        variant="outline"
+                        disabled={pagination.currentPage === pagination.totalPages}
+                        onClick={() => handlePageChange(pagination.currentPage + 1)}
+                    >
+                        <ChevronRight />
+                    </Button>
                 </div>
             )}
         </div>

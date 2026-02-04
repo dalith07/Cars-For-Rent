@@ -1,122 +1,94 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
 import { toast } from "sonner"
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-    Minus,
-    Plus,
-    Trash2,
-    ShoppingBag,
-    ArrowLeft,
-    Mail,
-} from "lucide-react"
+import { Trash2, CalendarDays, ArrowLeft, ShoppingBag } from "lucide-react"
+
 import { useCart } from "@/lib/cart_context"
-import { useOrders } from "@/lib/orders_context"
-import { createUserCart } from "@/actions/cart"
+import { createOrder } from "@/actions/cart"
 import { useCurrentUser } from "@/hooks/use-current-user"
 
 export default function CartPage() {
     const router = useRouter()
-    const { items, removeItem, updateQuantity, clearCart, getTotalPrice } = useCart()
+    const { items, removeItem, clearCart } = useCart()
+    const user = useCurrentUser()
 
-    // console.log("😍😉😉", items)
-    const { refreshOrderCount } = useOrders()
+    const [startDate, setStartDate] = useState("")
+    const [endDate, setEndDate] = useState("")
+    const [loading, setLoading] = useState(false)
 
-    const user = useCurrentUser();
+    // inside your component, update totalDays
+    const totalDays =
+        startDate && endDate
+            ? Math.max(
+                1,
+                Math.ceil(
+                    (new Date(endDate).getTime() - new Date(startDate).getTime()) /
+                    (1000 * 60 * 60 * 24)
+                )
+            )
+            : 0
 
-    useEffect(() => {
-        if (user) {
-            setCustomerName(user.name || "");
-            setCustomerEmail(user.email || "");
-            //   setPhoneNumber(user.. || "");
-        }
-    }, [user]);
+    // check if rental exceeds 7 days
+    const isExceedMaxDays = totalDays > 7
 
-    const [isCheckingOut, setIsCheckingOut] = useState(false)
-    const [customerName, setCustomerName] = useState("")
-    const [phoneNumber, setPhoneNumber] = useState("")
-    const [customerEmail, setCustomerEmail] = useState("")
-    const [country, setCountry] = useState("")
-    const [customerAddress, setCustomerAddress] = useState("")
+    // السعر لكل سيارة بعد التخفيض
+    const totalPrice = items.reduce((sum, car) => {
+        if (!totalDays) return sum
+        const priceAfterDiscount = car.pricePerDay * (1 - (car.discount ?? 0) / 100)
+        return sum + priceAfterDiscount * totalDays
+    }, 0)
 
-    const subtotal = getTotalPrice()
-    const tax = subtotal * 0.1 // 10% tax
-    const shipping = subtotal > 50 ? 0 : 9.99 // Free shipping over $50
-    const total = subtotal + tax + shipping
+    const TAX_RATE = 0.1
+    const SERVICE_FEE = 20
 
-    // ✅ FIXED CHECKOUT FUNCTION
-    const handleCheckout = async () => {
-        if (!customerName.trim() || !customerEmail.trim() || !customerAddress.trim()) {
-            toast.error("Please fill in all customer information")
-            return
-        }
-        if (items.length === 0) {
-            toast.error("Your cart is empty")
-            return
-        }
+    const subtotal = totalPrice
+    const tax = subtotal * TAX_RATE
+    const serviceFee = SERVICE_FEE
+    const finalTotal = subtotal + tax + serviceFee
+
+    const checkout = async () => {
+        if (!user?.id) return toast.error("Please login first")
+        if (!startDate || !endDate) return toast.error("Select rental dates")
+        if (items.length === 0) return toast.error("Cart is empty")
+        if (isExceedMaxDays) return toast.error("You cannot rent a car for more than 7 days")
 
         try {
-            setIsCheckingOut(true)
+            setLoading(true)
 
-            const result = await createUserCart({
-                userId: user?.id,
-                customerName: customerName,
-                customerEmail: customerEmail,
-                phoneNumber: phoneNumber,
-                country: country,
-                shippingAddress: customerAddress,
-                subtotal: subtotal,
-                tax: tax,
-                shipping: shipping,
-                total: total,
-                items: items.map((item) => ({
-                    id: item.id,
-                    name: item.name,
-                    description: item.description || "",
-                    price: item.price,
-                    quantity: item.quantity,
-                    discount: item.discount || 0,
-                    image: item.imagesOnCars?.[0]?.imageUrl,
-                    category: item.category?.name,            // 🔥 FIX expects string
-                    model: item.model?.name,
+            await createOrder({
+                userId: user.id,
+                companyId: items[0].companyId,
+                startDate: new Date(startDate),
+                endDate: new Date(endDate),
+                cars: items.map((c) => ({
+                    carId: c.id,
+                    pricePerDay: c.pricePerDay,
+                    discount: c.discount ?? 0,
                 })),
-            });
-
-            if (result.success) {
-                toast.success(result.message);
-            } else if (!result.success) {
-                toast.error(result.message)
-            }
-
+            })
 
             clearCart()
-            await refreshOrderCount()
+            toast.success("Order placed successfully 🚗")
             router.push("/your-orders")
-        } catch (error: any) {
-            console.error("Checkout error: 😭😭", error)
-            toast.error(error || "An error occurred during checkout")
+        } catch {
+            toast.error("Something went wrong")
         } finally {
-            setIsCheckingOut(false)
+            setLoading(false)
         }
     }
 
-    // ✅ Empty cart display
+    // عرض الكارت فاضي
     if (items.length === 0) {
         return (
             <div className="min-h-screen container mx-auto px-4 py-16 flex items-center justify-center">
@@ -136,271 +108,162 @@ export default function CartPage() {
             </div>
         )
     }
-    // ✅ Main cart UI
+
     return (
-        <>
-            <div className="min-h-screen mt-32">
+        <div className="min-h-screen mt-32 mb-24 bg-primary/5 text-white">
+            <div className="container mx-auto px-4 grid lg:grid-cols-3 gap-8">
 
-                <section className="py-12 px-4 bg-white/5 rounded-full">
-                    <div className="container mx-auto text-center">
-                        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Shopping Cart</h1>
-                        <p className="text-yellow-500/70">
-                            {items.length} {items.length === 1 ? "Item" : "Items"} in your cart
-                        </p>
-                    </div>
-                </section>
+                {/* CART ITEMS */}
+                <div className="lg:col-span-2 space-y-4">
+                    {items.map((car) => {
+                        const priceAfterDiscount = car.pricePerDay * (1 - (car.discount ?? 0) / 100)
+                        // const totalCarPrice = priceAfterDiscount * totalDays
+                        return (
+                            <Card key={car.id} className="bg-primary/10 border border-primary/20">
+                                <CardContent className="flex gap-4 p-4">
+                                    <div className="relative md:w-40 md:h-28 w-32 h-16 rounded-lg overflow-hidden border border-primary/20">
+                                        <Image
+                                            src={car.images?.[0]?.imageUrl || ""}
+                                            alt={car.name}
+                                            fill
+                                            className="object-cover hover:scale-110 duration-500"
+                                        />
+                                    </div>
 
-                <section className="py-8 px-4">
-                    <div className="container mx-auto">
-                        <Button variant="ghost" onClick={() => router.back()} className="mb-6 text-white">
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Continue Shopping
-                        </Button>
+                                    <div className="flex-1 space-y-2">
+                                        <h3 className="text-lg font-bold text-white">{car.name}</h3>
 
-                        <div className="grid lg:grid-cols-3 gap-8">
-                            {/* Cart Items */}
-                            <div className="lg:col-span-2 space-y-4">
-                                <Card className="bg-white/5 border-white/20">
-                                    <CardHeader className="flex flex-row items-center justify-between">
-                                        <CardTitle className="text-white">Cart Items ({items.length})</CardTitle>
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={clearCart}
-                                            className="hover:cursor-pointer"
-                                        >
-                                            <Trash2 className="h-4 w-4 mr-2" />
-                                            Clear Cart
-                                        </Button>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {items.map((item) => {
-                                            const itemPrice = item.discount
-                                                ? item.price * (1 - item.discount / 100)
-                                                : item.price
-                                            const itemTotal = itemPrice * item.quantity
-
-                                            return (
-                                                <div key={item.id}>
-                                                    <div className="flex gap-4">
-                                                        <div className="relative w-40 h-26 shrink-0 rounded-lg bg-white/10 border border-white/20">
-                                                            <Image
-                                                                src={item.imagesOnCars?.[0].imageUrl || ""}
-                                                                alt={"image car"}
-                                                                fill
-                                                                className="object-cover rounded-lg duration-500 hover:scale-150 hover:cursor-pointer"
-                                                            />
-                                                        </div>
-
-                                                        <div className="flex-1 space-y-2">
-                                                            <div className="flex items-start justify-between">
-                                                                <div>
-                                                                    <h3 className="font-semibold line-clamp-1 text-white">{item.name}</h3>
-                                                                    <div className="flex items-center gap-2 mt-1">
-                                                                        <Badge variant="secondary" className="text-xs border-white/20">
-                                                                            {item.category.name}
-                                                                        </Badge>
-                                                                        <Badge variant="outline" className="text-xs border-white/20 text-white">
-                                                                            {item.model.name}
-                                                                        </Badge>
-                                                                    </div>
-                                                                </div>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="icon"
-                                                                    className="bg-transparent border-white/20 hover:text-red-500 text-white hover:bg-red-500/50 hover:cursor-pointer"
-                                                                    onClick={() => removeItem(item.id)}
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </Button>
-                                                            </div>
-
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-2">
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="icon"
-                                                                        className="h-8 w-8 hover:scale-110 text-white bg-transparent hover:bg-destructive hover:text-white hover:cursor-pointer border-white/20"
-                                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                                        disabled={item.quantity <= 1}
-                                                                    >
-                                                                        <Minus className="h-3 w-3" />
-                                                                    </Button>
-
-                                                                    <span className="w-12 text-center font-semibold bg-white/10 rounded-lg text-white">{item.quantity}</span>
-
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="icon"
-                                                                        className="h-8 w-8 hover:scale-110 bg-transparent hover:bg-green-900 hover:text-white hover:cursor-pointer text-white border-white/20"
-                                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                                        disabled={item.quantity >= item.quantity}
-                                                                    >
-                                                                        <Plus className="h-3 w-3" />
-                                                                    </Button>
-
-                                                                    <span className="text-xs text-muted-foreground ml-2">
-                                                                        Max: {item.quantity}
-                                                                    </span>
-                                                                </div>
-
-                                                                <div className="text-right">
-                                                                    <div className="flex items-center gap-2">
-                                                                        {item.discount ? (
-                                                                            <>
-                                                                                <span className="text-lg font-bold text-white">
-                                                                                    {(item.price ?? 0)
-                                                                                        .toString()
-                                                                                        .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}{" "}
-                                                                                    DT
-                                                                                </span>
-                                                                                <span className="text-sm text-red-500/90 line-through">
-                                                                                    {(item.price ?? 0)
-                                                                                        .toString()
-                                                                                        .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}{" "}
-                                                                                    DT
-                                                                                </span>
-                                                                            </>
-                                                                        ) : (
-                                                                            <span className="text-lg font-bold">
-                                                                                {(item.price ?? 0)
-                                                                                    .toString()
-                                                                                    .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}{" "}
-                                                                                DT
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                    <p className="text-sm font-bold text-green-500 animate-bounce">
-                                                                        {(itemTotal ?? 0)
-                                                                            .toString()
-                                                                            .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}{" "}
-                                                                        DT
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <Separator className="mt-4 border-white/20" />
-                                                </div>
-                                            )
-                                        })}
-                                    </CardContent>
-                                </Card>
-                            </div>
-
-                            {/* Order Summary + Checkout */}
-                            <div className="space-y-6">
-                                <Card className="bg-white/10 border-white/20">
-                                    <CardHeader>
-                                        <CardTitle className="text-white">Customer Information</CardTitle>
-                                    </CardHeader>
-
-                                    <CardContent className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="name" className="text-white">Full Name</Label>
-                                            <Input
-                                                id="name"
-                                                placeholder="John Doe"
-                                                value={customerName}
-                                                className="bg-white/10 border-white/20 text-white"
-                                                onChange={(e) => setCustomerName(e.target.value)}
-                                            />
+                                        <div className="flex gap-2 flex-wrap">
+                                            <Badge className="bg-primary/20 text-white">{car.category.name}</Badge>
+                                            <Badge variant="outline" className="border-primary/30 text-white">{car.model.name}</Badge>
+                                            {car.discount! > 0 && (
+                                                <Badge className="bg-red-600 text-white">-{car.discount}%</Badge>
+                                            )}
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <Label htmlFor="email" className="text-white">Phone Number</Label>
-                                            <Input
-                                                id="phone"
-                                                type="number"
-                                                placeholder="55 555 555"
-                                                value={phoneNumber}
-                                                className="bg-white/10 border-white/20 text-white"
-                                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                            />
-                                        </div>
+                                        <p className="text-sm text-white/70">
+                                            {car.discount && car.discount > 0 ? (
+                                                <>
+                                                    <span className="line-through text-red-400 mr-2">
+                                                        {car.pricePerDay} TND
+                                                    </span>
+                                                    <span className="text-green-400 font-bold">
+                                                        {priceAfterDiscount.toLocaleString()} TND / day
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <span className="text-yellow-400 font-semibold">
+                                                    {car.pricePerDay.toLocaleString()} TND / day
+                                                </span>
+                                            )}
+                                        </p>
 
-                                        <div className="space-y-2">
-                                            <Label htmlFor="email" className="text-white">Email</Label>
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                placeholder="john@example.com"
-                                                value={customerEmail}
-                                                className="bg-white/10 border-white/20 text-white"
-                                                onChange={(e) => setCustomerEmail(e.target.value)}
-                                            />
-                                            <p className="text-xs text-yellow-500 animate-pulse opacity-90 mb-2 flex items-center gap-1">
-                                                <Mail className="h-3 w-3" />
-                                                Order confirmation will be sent here
+                                        {/* {totalDays > 0 && (
+                                            <p className="text-white font-bold">
+                                                Total: {totalCarPrice.toLocaleString()} DT
                                             </p>
-                                        </div>
+                                        )} */}
+                                    </div>
 
-                                        <div className="space-y-2">
-                                            <Label htmlFor="Country" className="text-white">Your Country</Label>
-                                            <Input
-                                                id="country"
-                                                placeholder="Enter Your Country (mahdia)"
-                                                value={country}
-                                                className="bg-white/10 border-white/20 text-white"
-                                                onChange={(e) => setCountry(e.target.value)}
-                                            />
-                                        </div>
+                                    <Button
+                                        variant="destructive"
+                                        size="icon"
+                                        onClick={() => removeItem(car.id)}
+                                    >
+                                        <Trash2 />
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        )
+                    })}
+                </div>
 
-                                        <div className="space-y-2">
-                                            <Label htmlFor="address" className="text-white">Shipping Address</Label>
-                                            <Input
-                                                id="address"
-                                                placeholder="123 Main St"
-                                                value={customerAddress}
-                                                className="bg-white/10 border-white/20 text-white"
-                                                onChange={(e) => setCustomerAddress(e.target.value)}
-                                            />
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                {/* SUMMARY */}
+                <div className="space-y-6">
+                    {/* Rental Dates */}
+                    <Card className="bg-primary/10 border border-primary/20">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-white text-lg">
+                                <CalendarDays className="h-5 w-5 text-primary" />Rental Period
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                                <div className="flex-1">
+                                    <Label className="text-white/80 text-sm mb-1 block">Start Date :</Label>
+                                    <Input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        className="w-full bg-primary/20 border-primary/30 text-white focus:ring-1 focus:ring-primary"
+                                    />
+                                </div>
 
-                                {/* Order Summary */}
-                                <Card className="bg-white/10 border-white/20">
-                                    <CardHeader>
-                                        <CardTitle className="text-white">Order Summary</CardTitle>
-                                        <CardDescription className="text-gray-400">Review your order details</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Subtotal</span>
-                                            <span className="text-white">
-                                                {(subtotal)
-                                                    .toString()
-                                                    .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}{" "}
-                                                DT
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Shipping</span>
-                                            <span className="text-white">{shipping === 0 ? "FREE" : `$${(shipping).toString()
-                                                .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}}`}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Tax (10%)</span>
-                                            <span className="text-white">{tax.toString()
-                                                .replace(/\B(?=(\d{3})+(?!\d))/g, ".")} DT</span>
-                                        </div>
-                                        <Separator />
-                                        <div className="flex justify-between text-lg font-bold">
-                                            <span className="text-white">Total</span>
-                                            <span className="text-green-200 animate-bounce">{total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} DT</span>
-                                        </div>
-                                        <Button className="w-full text-white hover:cursor-pointer" size="lg" onClick={handleCheckout} disabled={isCheckingOut}>
-                                            {isCheckingOut ? "Processing..." : "Place Order"}
-                                        </Button>
-                                    </CardContent>
-                                </Card>
+                                <div className="flex-1">
+                                    <Label className="text-white/80 text-sm mb-1 block">End Date :</Label>
+                                    <Input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        max={
+                                            startDate
+                                                ? new Date(new Date(startDate).getTime() + 7 * 24 * 60 * 60 * 1000)
+                                                    .toISOString()
+                                                    .split("T")[0]
+                                                : undefined
+                                        }
+                                        className="w-full bg-primary/20 border-primary/30 text-white focus:ring-1 focus:ring-primary"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
+
+
+                            {startDate && endDate && (
+                                <div className="text-sm text-primary/90 bg-primary/20 border border-primary/30 rounded-lg px-3 py-2 text-center">
+                                    🗓️ Rental duration: <span className="font-bold text-white">{totalDays} days</span>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Order Summary */}
+                    <Card className="bg-primary/10 border border-primary/20">
+                        <CardContent className="space-y-3 pt-6">
+                            <div className="flex justify-between text-white/80">
+                                <span>Days</span>
+                                <span>{totalDays}</span>
+                            </div>
+                            <div className="flex justify-between text-white/80">
+                                <span>Subtotal</span>
+                                <span>{subtotal.toLocaleString()} TND</span>
+                            </div>
+                            <div className="flex justify-between text-white/80">
+                                <span>Tax (10%)</span>
+                                <span>{tax.toLocaleString()} TND</span>
+                            </div>
+                            <div className="flex justify-between text-white/80">
+                                <span>Service Fee</span>
+                                <span>{serviceFee} TND</span>
+                            </div>
+
+                            <Separator className="bg-primary/20" />
+
+                            <div className="flex justify-between text-lg font-bold text-green-400">
+                                <span>Total</span>
+                                <span>{finalTotal.toLocaleString()} TND</span>
+                            </div>
+
+                            <Button
+                                disabled={loading || !startDate || !endDate}
+                                onClick={checkout}
+                                className="text-white w-full hover:cursor-pointer bg-primary/10 duration-500 hover:bg-primary/15 border border-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? "Processing..." : "Confirm Rental"}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
-        </>
+        </div>
     )
 }
-

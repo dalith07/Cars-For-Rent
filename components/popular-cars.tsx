@@ -1,146 +1,154 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { motion } from "framer-motion";
-import { Fuel, Gauge, Timer } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ExternalLink, Fuel, Gauge, Timer } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
-const cars = [
-    {
-        name: "Mercedes G Class",
-        img: "/cars/Mercedes-G-Class.png",
-        price: "150 TND / day",
-        fuel: "Diesel",
-        speed: "260 km/h",
-        discount: "10%",
-        available: "Yes",
-    },
-    {
-        name: "BMW M5 Competition",
-        img: "/cars/bmw_m5_competition_2.png",
-        price: "170 TND / day",
-        fuel: "Petrol",
-        speed: "260 km/h",
-        discount: "0%",
-        available: "Yes",
-    },
-    {
-        name: "Bentley Bentayga",
-        img: "/cars/Bentley-Bentayga-1.png",
-        price: "110 TND / day",
-        fuel: "Petrol",
-        speed: "235 km/h",
-        discount: "15%",
-        available: "No",
-    },
-];
+interface Car {
+    id: string;
+    name: string;
+    img: string;
+    price: string;
+    fuel: string;
+    speed: string;
+    discount?: string;
+    available: string;
+}
 
-export default function PopularCars() {
+interface PopularCarsProps {
+    cars: Car[];
+}
+
+const BATCH_SIZE = 3;
+const INTERVAL_TIME = 5000;
+
+export default function PopularCars({ cars }: PopularCarsProps) {
+    const [startIndex, setStartIndex] = useState(0);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const startInterval = () => {
+        if (intervalRef.current || cars.length <= BATCH_SIZE) return;
+
+        intervalRef.current = setInterval(() => {
+            setStartIndex(prev =>
+                prev + BATCH_SIZE >= cars.length ? 0 : prev + BATCH_SIZE
+            );
+        }, INTERVAL_TIME);
+    };
+
+    const stopInterval = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+    };
+
+    useEffect(() => {
+        startInterval();
+        return stopInterval;
+    }, [cars.length]);
+
+    const carsToShow = cars.slice(startIndex, startIndex + BATCH_SIZE);
+
     return (
-        <section className="py-20 bg-linear-to-b from-black via-zinc-900 to-black">
+        <section className="py-20 bg-muted/30 dark:bg-black/5 backdrop-blur-xs">
             <div className="container mx-auto px-6">
 
-                {/* Section Title */}
-                <motion.h2
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className="text-4xl font-bold text-center mb-12 text-white"
-                >
-                    New Cars Available <span className="text-yellow-500">For Rent</span>
-                </motion.h2>
+                <h2 className="text-4xl font-bold text-center mb-12 text-foreground">
+                    New Cars Available <span className="text-yellow-500 dark:text-yellow-500">For Rent</span>
+                </h2>
 
-                {/* Cars Grid */}
-                <div className="grid md:grid-cols-3 gap-10">
-                    {cars.map((car, index) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+
+                    {carsToShow.map((_, cardIndex) => (
                         <motion.div
-                            key={index}
-                            initial={{
-                                opacity: 0,
-                                y: 50,
-                                backgroundColor: "rgba(255,255,255,0.05)",
-                                borderColor: "rgba(168,85,247,0.4)",
-                            }}
-                            whileInView={{
-                                opacity: 1,
-                                y: 0,
-                            }}
+                            key={cardIndex}
+                            onMouseEnter={stopInterval}   // ✅ pause
+                            onMouseLeave={startInterval} // ✅ resume
                             whileHover={{
-                                scale: 1.05,
-                                backgroundColor: "rgba(255,255,255,0.08)",
-                                borderColor: "rgba(168,85,247,0.8)",
-                                boxShadow:
-                                    "0px 0px 25px rgba(168, 85, 247, 0.5)",
+                                y: -8,
+                                scale: 1.03,
+                                // boxShadow: "0px 0px 35px rgba(31,41,55)",
                             }}
-                            transition={{
-                                duration: 0.6,
-                                delay: index * 0.2,
-                            }}
-                            viewport={{ once: true }}
-                            className="relative group border rounded-2xl p-6 shadow-xl backdrop-blur-sm cursor-pointer"
+                            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                            className="relative border border-border rounded-2xl p-6 
+                            backdrop-blur-sm bg-card group hover:bg-accent/50 dark:hover:bg-primary/15
+                             duration-500 cursor-pointer"
                         >
-
-                            {/* Discount Badge */}
-                            {car.discount && (
-                                <motion.span
-                                    initial={{ scale: 0, rotate: -45 }}
-                                    animate={{ scale: 1, rotate: 0 }}
-                                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                                    className="absolute top-4 right-4 opacity-30 group-hover:opacity-100 duration-700 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-lg"
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={carsToShow[cardIndex]?.name}
+                                    initial={{ opacity: 0, y: 25 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -25 }}
+                                    transition={{ duration: 0.45 }}
                                 >
-                                    {car.discount} OFF
-                                </motion.span>
-                            )}
+                                    {carsToShow[cardIndex] && (
+                                        <>
+                                            {/* Discount */}
+                                            {carsToShow[cardIndex].discount && (
+                                                <span className="absolute top-4 right-4 px-3 py-1 text-xs font-bold rounded-full
+                                                bg-linear-to-r from-red-500 to-pink-500 text-white shadow-lg animate-pulse">
+                                                    {carsToShow[cardIndex].discount} OFF
+                                                </span>
+                                            )}
 
-                            {/* Image */}
-                            <motion.div
-                                className="flex justify-center mb-4"
-                                whileHover={{ scale: 1.15, y: -10 }}
-                                transition={{
-                                    type: "spring",
-                                    stiffness: 250,
-                                    damping: 15,
-                                }}
-                            >
-                                <div className="w-[150px] h-[100px] relative">
-                                    <Image
-                                        src={car.img}
-                                        alt={car.name}
-                                        fill
-                                        className="object-contain pointer-events-none"
-                                    />
-                                </div>
-                            </motion.div>
+                                            {/* Link go to car by id */}
+                                            <Link href={`/market-cars/${carsToShow[cardIndex].id}`}>
+                                                <span
+                                                    className="absolute bottom-4 right-4 text-xs font-bold
+                                                text-blue-400/80 opacity-0 group-hover:opacity-100
+                                                group-hover:-translate-y-1.5 group-hover:translate-x-1.5
+                                                group-hover:scale-110 duration-500"
+                                                >
+                                                    <ExternalLink />
+                                                </span>
+                                            </Link>
 
-                            {/* Title */}
-                            <h3 className="text-2xl font-semibold text-white text-center">
-                                {car.name}
-                            </h3>
+                                            {/* Image */}
+                                            <div className="flex justify-center mb-4">
+                                                <div className="w-[170px] h-[110px] relative">
+                                                    <Image
+                                                        src={carsToShow[cardIndex].img}
+                                                        alt={carsToShow[cardIndex].name}
+                                                        fill
+                                                        className="object-contain"
+                                                    />
+                                                </div>
+                                            </div>
 
-                            {/* Price */}
-                            <p className="text-center text-purple-300 mt-2 text-lg font-bold">
-                                {car.price}
-                            </p>
+                                            <h3 className="text-2xl font-semibold text-card-foreground text-center">
+                                                {carsToShow[cardIndex].name}
+                                            </h3>
 
-                            {/* Specs */}
-                            <div className="mt-4 space-y-3 text-white/80">
-                                <div className="flex items-center gap-3">
-                                    <Fuel className="text-yellow-500" />
-                                    <span>Fuel: {car.fuel}</span>
-                                </div>
+                                            <p className="text-center text-primary dark:text-purple-300 mt-2 text-lg font-bold">
+                                                {carsToShow[cardIndex].price}
+                                            </p>
 
-                                <div className="flex items-center gap-3">
-                                    <Gauge className="text-yellow-500" />
-                                    <span>Top Speed: {car.speed}</span>
-                                </div>
-
-                                <div className="flex items-center gap-3">
-                                    <Timer className="text-yellow-500" />
-                                    <span>Available: {car.available}</span>
-                                </div>
-                            </div>
+                                            <div className="mt-4 space-y-3 text-muted-foreground dark:text-white/80">
+                                                <div className="flex gap-3">
+                                                    <Fuel className="text-yellow-500" />
+                                                    Fuel: {carsToShow[cardIndex].fuel}
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <Gauge className="text-yellow-500" />
+                                                    Speed: {carsToShow[cardIndex].speed}
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <Timer className="text-yellow-500" />
+                                                    Available: {carsToShow[cardIndex].available}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
                         </motion.div>
                     ))}
+
                 </div>
             </div>
         </section>

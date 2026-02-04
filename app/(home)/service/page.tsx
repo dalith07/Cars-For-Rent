@@ -1,10 +1,11 @@
+import { getAllCompaniesForMap } from "@/actions/dashboard/company/company";
+import ServiceClient from "./service-client";
 
-const Service = () => {
+const Service = async () => {
+    const res = await getAllCompaniesForMap();
     return (
-        <div>
-            Service
-        </div>
-    )
-}
+        <ServiceClient companies={res.success ? res.data : []} />
+    );
+};
 
-export default Service
+export default Service;

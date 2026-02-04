@@ -9,13 +9,20 @@ interface SingleProductPageProps {
 }
 
 export default async function Page({ params }: SingleProductPageProps) {
-    const Cars = (await prisma.itemsCars.findUnique({
+    const Cars = (await prisma.car.findUnique({
         where: { id: (await params).id },
 
         include: {
             category: true,
             model: true,
-            imagesOnCars: true,
+            images: true,
+            company: {
+                select: {
+                    id: true,
+                    name: true,
+                    logo: true,
+                },
+            },
         },
     })) as ItemsCarsWithAll;
 
@@ -23,8 +30,6 @@ export default async function Page({ params }: SingleProductPageProps) {
         toast.error("Product Not Found")
         return notFound();
     }
-
-    console.log(Cars)
 
     return (
         <div className="min-h-screen">

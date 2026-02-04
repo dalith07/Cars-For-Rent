@@ -38,10 +38,19 @@ export default function LanguageSwitcher() {
         <div ref={ref} className="relative">
             {/* Globe Button */}
             <button
-                onClick={() => setOpen(!open)}
-                className="md:p-4 p-3 cursor-pointer rounded-full border border-white/20 bg-white/20 hover:bg-white/10 text-gray-300 duration-500"
+                className="
+    flex items-center justify-center
+     w-11 h-11
+    rounded-full
+    border border-primary/20
+    bg-primary/10
+    text-primary/80
+    hover:bg-primary/15
+    hover:text-primary
+    duration-500 hover:cursor-pointer
+  "
             >
-                <Globe className="w-5 h-5 md:w-6 md:h-6" />
+                <Globe size={22} className=' group-hover:scale-110 group-hover:rotate-360 duration-500' />
             </button>
 
             {/* Dropdown */}

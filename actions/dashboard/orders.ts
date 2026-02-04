@@ -2,13 +2,14 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/lib/prisma";
+import { RentalStatus, PaymentStatus, NotificationType } from "@prisma/client";
 
 export async function getUsersOrders() {
   try {
     const order = await prisma.order.findMany({
       orderBy: { createdAt: "desc" },
       include: {
-        items: true,
+        orderCars: { include: { car: true } },
         user: true,
       },
     });
@@ -22,34 +23,55 @@ export async function getUsersOrders() {
 
 export async function updateOrder(
   orderId: string,
-  status: "confirmed" | "processing" | "cancelled",
-  isPaid: "Paid" | "Not Paid"
+  newStatus: RentalStatus,
+  isPaid: PaymentStatus,
 ) {
   try {
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
-      data: { status, isPaid },
-      include: { user: true, items: true },
+      data: {
+        status: newStatus,
+        paymentStatus: isPaid,
+      },
+      include: {
+        user: true,
+        orderCars: { include: { car: true } },
+      },
     });
 
-    if (
-      (status === "confirmed" || status === "cancelled") &&
-      updatedOrder.userId
-    ) {
-      await prisma.notification.create({
-        data: {
-          userId: updatedOrder.userId,
-          title:
-            status === "confirmed"
-              ? "Order Confirmed ✅"
-              : "Order Cancelled ❌",
-          message:
-            status === "confirmed"
-              ? "Your order has been confirmed successfully."
-              : "Your order has been cancelled. Please contact support if needed.",
-        },
-      });
-    }
+    // Notification messages
+    const statusMessages: Record<RentalStatus, string> = {
+      PENDING: "Your order is pending review.",
+      ACCEPTED: "✅ Your rental order has been accepted.",
+      REJECTED: "❌ Your rental order has been rejected.",
+      CANCELLED: "⚠️ Your rental order has been cancelled.",
+      COMPLETED: "🎉 Your rental has been completed successfully.",
+    };
+
+    const paymentMessages: Record<PaymentStatus, string> = {
+      NOT_PAID: "⚠️ Payment is marked as not paid.",
+      PAID: "💰 Payment has been successfully received.",
+    };
+
+    // Create notifications for status
+    await prisma.notification.create({
+      data: {
+        userId: updatedOrder.userId,
+        title: "Order Status Update",
+        message: statusMessages[newStatus],
+        type: NotificationType.ORDER, // ✅ required enum
+      },
+    });
+
+    // Create notifications for payment
+    await prisma.notification.create({
+      data: {
+        userId: updatedOrder.userId,
+        title: "Payment Status Update",
+        message: paymentMessages[isPaid],
+        type: NotificationType.PAYMENT, // ✅ required enum
+      },
+    });
 
     return updatedOrder;
   } catch (error: any) {

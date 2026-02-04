@@ -21,7 +21,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { login } from "@/actions/login";
 import CardWrapper from "./card-wrapper";
 import Link from "next/link";
-import { Home } from "lucide-react";
+import { Eye, EyeOff, Home, } from "lucide-react";
 
 const LoginForm = () => {
     const searchParams = useSearchParams();
@@ -34,6 +34,7 @@ const LoginForm = () => {
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition();
+    const [showPassword, setShowPassword] = useState(false);
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -83,15 +84,14 @@ const LoginForm = () => {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-gray-300">Email</FormLabel>
+                                    <FormLabel className="text-accent-foreground text-sm">Email:</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
                                             type="email"
                                             placeholder="john.doe@example.com"
                                             disabled={isPending}
-                                            className="bg-gray-700 border-gray-600 text-white"
-
+                                            className="bg-blue-600/10 border-blue-600/50 text-white focus:border-blue-600/70 duration-500 transition-colors pr-10"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -103,27 +103,26 @@ const LoginForm = () => {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-gray-300">Password</FormLabel>
+                                    <FormLabel className="text-accent-foreground text-sm">Password:</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            {...field}
-                                            type="password"
-                                            placeholder="********"
-                                            disabled={isPending}
-                                            className="bg-gray-700 border-gray-600 text-white"
+                                        <div className="relative">
+                                            <Input
+                                                {...field}
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="********"
+                                                disabled={isPending}
+                                                className="bg-blue-600/10 border-blue-600/50 text-white focus:border-blue-600/70 duration-500 transition-colors pr-10"
+                                            />
 
-                                        />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute text-blue-400 hover:cursor-pointer right-3 top-1/2 -translate-y-1/2 hover:text-blue-400/50 duration-500 "
+                                            >
+                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
                                     </FormControl>
-                                    {/* <div>
-                                        <Button
-                                            size="sm"
-                                            variant="link"
-                                            asChild
-                                            className="px-0 font-normal"
-                                        >
-                                            <Link href={"/auth/reset"}>Forgot Password?</Link>
-                                        </Button>
-                                    </div> */}
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -136,7 +135,7 @@ const LoginForm = () => {
                     <Button
                         disabled={isPending}
                         type="submit"
-                        className="w-full hover:cursor-pointer bg-blue-600 hover:bg-blue-500 text-white">
+                        className="w-full hover:cursor-pointer bg-blue-600/70 hover:bg-blue-600/50 hover:text-white border-blue-600  border duration-500 text-white">
                         Login
                     </Button>
                 </form>
