@@ -188,14 +188,13 @@ import { getUserById, getUserByEmail } from "@/data/user";
 import { UserRole } from "@prisma/client";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
+  trustHost: true,
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/login",
     error: "/auth/error",
   },
-
-  adapter: PrismaAdapter(prisma),
-
-  session: { strategy: "jwt" },
 
   providers: [
     Google({

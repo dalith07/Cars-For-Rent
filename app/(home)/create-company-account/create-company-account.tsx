@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+export const dynamic = 'force-dynamic';
+
 
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -76,13 +77,13 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
         userCompanyState?.status === "APPROVED" &&
         userCompanyState?.owner.role === "COMPANY_OWNER";
 
-
     // 3️⃣ poll for updates every 5s
+
     useEffect(() => {
         if (!userCompanyState) return;
 
         const interval = setInterval(async () => {
-            const updatedCompany = await getUserCompany(); // server action
+            const updatedCompany = await getUserCompany();
             if (updatedCompany && updatedCompany.status !== userCompanyState.status) {
                 setUserCompanyState(updatedCompany);
             }
@@ -117,7 +118,6 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
         () => userCompany?.id
     );
 
-
     useEffect(() => {
         document.body.style.overflow = success ? "hidden" : "auto";
         return () => {
@@ -143,6 +143,7 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
         startUpload(acceptedFiles, { configId: undefined });
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const onDropRejected = (rejectedFiles: FileRejection[]) => { };
 
     const validate = () => {
@@ -726,60 +727,6 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
                         </motion.div>
                     </motion.div>
                 )}
-
-                {/* 🔥 SUCCESS OVERLAY */}
-                {/* {userCompanyState && (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center px-6"
-  >
-    <motion.div
-      initial={{ scale: 0.9, y: 20 }}
-      animate={{ scale: 1, y: 0 }}
-      className="max-w-md w-full bg-gray-900 p-8 rounded-2xl text-center border border-white/10 shadow-2xl"
-    >
-      {isVerified ? (
-        <>
-          <h2 className="text-2xl font-bold text-green-400 mb-4">
-            Your Company Has Been Approved!
-          </h2>
-          <p className="text-gray-200 mb-6">
-            Your company is now verified and approved. You can access the dashboard.
-          </p>
-          <Button
-            onClick={() => router.push("/company")}
-            className="bg-primary text-white w-full"
-          >
-            Go to Company Dashboard
-          </Button>
-        </>
-      ) : (
-        <>
-          <h2 className="lg:text-2xl font-bold text-green-400 mb-4">
-            Company Submitted Successfully
-          </h2>
-          <p className="text-gray-200 mb-3">
-            Your request has been sent to the admin.
-          </p>
-          <p className="text-gray-400 text-sm mb-2">
-            ⏳ Please wait up to{" "}
-            <span className="text-white font-semibold animate-pulse">24 hours</span>{" "}
-            for approval.
-          </p>
-          <div className="flex items-center justify-center gap-4 mt-4">
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Link href={"/"}>
-              <Button>Back Home</Button>
-            </Link>
-          </div>
-        </>
-      )}
-    </motion.div>
-  </motion.div>
-)} */}
 
             </div>
         </>

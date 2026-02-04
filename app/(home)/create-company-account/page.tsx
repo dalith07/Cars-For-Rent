@@ -1,11 +1,11 @@
 import { getUserCompany } from "@/actions/dashboard/company/company";
 import CreateCompanyAccount from "./create-company-account";
 
-const Page = async () => {
-    // const company = await getCompany();
-    const userCompany = await getUserCompany();
+// ✅ لازمها تكون فوق أي logic
+export const dynamic = "force-dynamic";
 
-    console.log(userCompany?.status)
+const Page = async () => {
+    const userCompany = await getUserCompany();
 
     return (
         <div>

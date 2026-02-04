@@ -1,5 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
+
+import "server-only";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
@@ -188,6 +190,7 @@ export async function getAllCompanies() {
     return { success: true, data: companies as unknown as CompanyWithAll[] };
   } catch (error: any) {
     console.error("❌ Error fetching companies:", error);
+    // Return empty array if database is unavailable during build
     return {
       success: false,
       error: error.message,

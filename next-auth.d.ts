@@ -37,16 +37,13 @@ declare module "next-auth" {
       isBanned?: boolean;
       image?: string | null;
     } & DefaultSession["user"];
-
     error?: string;
   }
-
   interface User extends DefaultUser {
     role?: UserRole;
     image?: string | null;
   }
 }
-
 declare module "next-auth/jwt" {
   interface JWT {
     role?: UserRole;

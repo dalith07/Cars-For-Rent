@@ -27,21 +27,27 @@ export async function getSoldCarsWithCompany() {
 
 // Get all cars
 export async function getAllCarsWithCompany() {
-  const cars = await prisma.car.findMany({
-    include: {
-      company: {
-        select: {
-          name: true,
-          logo: true,
-          cars: true,
+  try {
+    const cars = await prisma.car.findMany({
+      include: {
+        company: {
+          select: {
+            name: true,
+            logo: true,
+            cars: true,
+          },
         },
+        images: true,
       },
-      images: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-  return cars;
+    return cars;
+  } catch (error) {
+    // Handle database connection errors during build time
+    console.error("❌ Error fetching cars:", error);
+    return [];
+  }
 }
