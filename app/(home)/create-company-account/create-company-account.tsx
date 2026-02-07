@@ -1,7 +1,6 @@
 "use client";
 export const dynamic = 'force-dynamic';
 
-
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -24,7 +23,6 @@ type Props = {
         owner: { role: string };
     } | null;
 };
-
 
 type FieldErrors = {
     name?: string;
@@ -235,7 +233,7 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
                     className="
   w-full max-w-2xl
   bg-white dark:bg-gray-900
-  border border-gray-200 dark:border-blue-400/20
+  border border-gray-200 dark:border-blue-950
   rounded-2xl p-8 shadow-2xl
   text-gray-900 dark:text-gray-100
   relative
@@ -247,6 +245,7 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
                             <span className="blinking-cursor">|</span>
                         }
                     </h1>
+
                     {!openForm && <p className="mb-6 text-sm text-center text-red-600 font-bold animate-pulse">
                         Please read the instructions carefully, then create your company. !
                     </p>}
@@ -295,7 +294,7 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
                             </div>
 
                             {/* EMAIL + PHONE */}
-                            <div className="flex items-center justify-between ">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <Label className="text-sm mb-1 text-gray-400 dark:text-gray-300">Email :</Label>
                                     <Input
@@ -336,7 +335,7 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
                             </div>
 
                             {/* CITY + ADDRESS */}
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <Label className="text-sm mb-1 text-gray-400 dark:text-gray-300">City:</Label>
                                     <Input
@@ -393,7 +392,7 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
                             </div>
 
                             {/* LAT + LNG */}
-                            <div className="flex items-center justify-between gap-4">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="w-full">
                                     <Label className="text-sm mb-1 text-gray-400 dark:text-gray-300">
                                         Latitude
@@ -516,7 +515,7 @@ export default function CreateCompanyAccount({ userCompany }: Props) {
                             </div>
 
                             {/* BANK INFO */}
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <Label className="text-sm mb-1 text-gray-400 dark:text-gray-300">Bank Name:</Label>
                                     <Input

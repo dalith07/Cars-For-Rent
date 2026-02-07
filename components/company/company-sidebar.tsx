@@ -61,22 +61,22 @@ export function CompanySidebar() {
     const user = useCurrentUser()
 
     return (
-        <Sidebar className="bg-emerald-900 text-emerald-100">
-            <SidebarHeader className="border-b border-amber-800 p-3 bg-amber-900">
+        <Sidebar className="bg-emerald-800 text-emerald-100">
+            <SidebarHeader className="border-b border-emerald-900 p-3 bg-emerald-900">
                 <div className="flex items-center gap-2">
                     <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                        <Building2 className="size-4" />
+                        <Building2 />
                     </div>
                     <div className="flex flex-col">
                         <span className="text-sm font-semibold">Company Portal</span>
-                        <span className="text-xs text-gray-300">Rental Management</span>
+                        <span className="text-xs text-gray-400">Rental Management</span>
                     </div>
                 </div>
             </SidebarHeader>
 
-            <SidebarContent className="bg-emerald-900">
+            <SidebarContent className="bg-emerald-950">
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-gray-300">Navigation</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-gray-400 mb-2">Navigation:</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {navigation.map((item) => {
@@ -115,7 +115,7 @@ export function CompanySidebar() {
                     </div>
                     <div className="flex flex-col leading-tight">
                         <span className="text-sm font-medium">{user?.name}</span>
-                        <span className="text-xs text-muted-foreground">{user?.email}</span>
+                        <span className="text-xs text-slate-300">{user?.email}</span>
                     </div>
                 </div>
             </SidebarFooter>

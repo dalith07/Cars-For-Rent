@@ -4,7 +4,7 @@ import { signIn } from "@/auth";
 import { getUserByEmail } from "@/data/user";
 import { prisma } from "@/lib/prisma";
 import { RegisterSchema } from "@/lib/validationSchema";
-import { DEFAULT_LOGIN_REDIRECT } from "@/route";
+// import { DEFAULT_LOGIN_REDIRECT } from "@/route";
 import bcrypt from "bcryptjs";
 import z from "zod";
 

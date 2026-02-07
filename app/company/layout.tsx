@@ -10,7 +10,10 @@ export default function CompanyLayout({
     return (
         <SidebarProvider>
             <CompanySidebar />
-            <SidebarInset className="bg-emerald-50">{children}</SidebarInset>
+            <SidebarInset className="bg-emerald-50">
+                {children}
+            </SidebarInset>
+
         </SidebarProvider>
     )
 }

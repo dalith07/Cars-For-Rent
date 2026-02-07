@@ -360,62 +360,47 @@ const CreateCars = () => {
                 <CompanyHeader title="Create Car" description="Fill in details for your new car item." />
 
                 <main className="flex flex-1 flex-col gap-6 p-6">
-                    <Card className="bg-amber-800">
+                    <Card className="bg-emerald-800 border-emerald-700">
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-6">
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="title">Car Name *</Label>
+                                        <Label htmlFor="title" className="text-gray-300">Car Name</Label>
                                         <Input
                                             id="title"
                                             placeholder="e.g. Tesla Model S"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
                                             required
+                                            className="bg-emerald-900 border-emerald-800 text-white placeholder:text-slate-400"
                                         />
                                     </div>
 
-                                    {/* <div className="space-y-2">
-                                        <Label htmlFor="engine">Version Type</Label>
-                                        <Select
-                                            value={version}
-                                            onValueChange={(value) => setVersion(value)}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select engine type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="new">New</SelectItem>
-                                                <SelectItem value="occasion">Occasion</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div> */}
-
                                     <div className="space-y-2">
-                                        <Label htmlFor="sold">Stock:</Label>
+                                        <Label htmlFor="sold" className="text-gray-300">Stock</Label>
                                         <Input
                                             id="quantity"
                                             type="number"
                                             placeholder="0"
                                             value={stock}
                                             onChange={(e) => setStock(e.target.value)}
-                                            className="w-full"
+                                            className="bg-emerald-900 border-emerald-800 text-white placeholder:text-slate-400"
                                         />
                                     </div>
                                 </div >
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <Label>Category *</Label>
+                                        <Label className="text-gray-300">Category</Label>
                                         <Select
                                             value={selectedCategoryId}
                                             onValueChange={setSelectedCategoryId}
                                         >
-                                            <SelectTrigger className="w-full">
+                                            <SelectTrigger className="w-full bg-emerald-900 border-emerald-700/70 text-white">
                                                 <SelectValue placeholder="Select category" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="bg-emerald-900 border-emerald-700/70 text-white">
                                                 {categories.map((cat) => (
                                                     <SelectItem key={cat.id} value={cat.id}>
                                                         {cat.name}
@@ -425,21 +410,19 @@ const CreateCars = () => {
                                         </Select>
                                     </div>
 
-
-
                                     <div className="space-y-2">
-                                        <Label>Model *</Label>
+                                        <Label className="text-gray-300">Model</Label>
 
                                         <Select value={selectedModelId} onValueChange={setSelectedModelId}>
-                                            <SelectTrigger className="w-full ">
-                                                <SelectValue placeholder="Select model" className="text-center" />
+                                            <SelectTrigger className="w-full bg-emerald-900 border-emerald-700/70 text-white">
+                                                <SelectValue placeholder="Select model" />
                                             </SelectTrigger>
 
-                                            <SelectContent>
+                                            <SelectContent className="bg-emerald-900 border-emerald-700/70 text-white">
                                                 {models.map((group, i) => (
                                                     <SelectGroup key={i}>
-                                                        <SelectLabel className="flex items-center justify-between bg-yellow-50">
-                                                            <div className="flex items-center text-blue-500 font-extrabold gap-4">
+                                                        <SelectLabel className="flex items-center justify-between bg-emerald-800">
+                                                            <div className="flex items-center text-slate-100 font-extrabold gap-4">
                                                                 {group.brand}
                                                                 <Image
                                                                     src={group.icon || "/logos/default.png"}
@@ -448,17 +431,6 @@ const CreateCars = () => {
                                                                     height={20}
                                                                 />
                                                             </div>
-                                                            {/* <button
-                                                            onClick={() =>
-                                                                setModelMenu((prev) => ({
-                                                                    ...prev,
-                                                                    [group.brand]: !prev[group.brand],
-                                                                }))
-                                                            }
-                                                            className="p-2 bg-amber-950 rounded-lg text-white"
-                                                        >
-                                                            {modelMenu[group.brand] ? <Minus size={20} /> : <Plus size={20} />}
-                                                        </button> */}
 
                                                             <button
                                                                 onClick={(e) => {
@@ -470,7 +442,7 @@ const CreateCars = () => {
                                                                     }));
                                                                 }}
                                                                 type="button"
-                                                                className="p-2 bg-amber-950 rounded-lg text-white"
+                                                                className="p-2 hover:cursor-pointer bg-emerald-950 rounded-lg text-white"
                                                             >
                                                                 {modelMenu[group.brand] ? <Minus size={20} /> : <Plus size={20} />}
                                                             </button>
@@ -491,13 +463,14 @@ const CreateCars = () => {
 
                                     <div className="space-y-2">
                                         <div className="space-y-2 " >
-                                            <Label htmlFor="status">Status</Label>
+                                            <Label htmlFor="status" className="text-gray-300">Status</Label>
                                             <Select value={status} onValueChange={setStatus} >
-                                                <SelectTrigger className="w-full">
+                                                <SelectTrigger className="w-full bg-emerald-900 border-emerald-700/70 text-white">
                                                     <SelectValue placeholder="Select status" />
                                                 </SelectTrigger>
-                                                {/* <SelectContent > */}
-                                                <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                                                <SelectContent
+                                                    className="bg-emerald-900 border-emerald-700/70 text-white"
+                                                >
                                                     <SelectItem value="AVAILABLE">Available</SelectItem>
                                                     <SelectItem value="RENTED">Rented</SelectItem>
                                                     <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
@@ -511,7 +484,7 @@ const CreateCars = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     {/* 🧾 Price field with DT formatting */}
                                     <div className="space-y-2">
-                                        <Label>Price (DT) *</Label>
+                                        <Label className="text-gray-300">Price (DT)</Label>
                                         <Input
                                             type="text"
                                             placeholder="e.g. 25.000.000 DT"
@@ -525,24 +498,25 @@ const CreateCars = () => {
                                                 setPricePerDay(raw);
                                             }}
                                             required
+                                            className="bg-emerald-900 border-emerald-800 text-white placeholder:text-slate-400"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="sold">discount % *</Label>
+                                        <Label htmlFor="sold" className="text-gray-300">discount %</Label>
                                         <Input
                                             id="sold"
                                             type="number"
                                             placeholder="80% & 50%"
                                             value={discount}
                                             onChange={(e) => setDiscount(e.target.value)}
-                                            className="w-"
+                                            className="bg-emerald-900 border-emerald-800 text-white placeholder:text-slate-400"
                                         />
                                     </div>
 
                                     {/* 📅 Year field (max 4 digits) */}
                                     <div className="space-y-2">
-                                        <Label>Year</Label>
+                                        <Label className="text-gray-300">Year</Label>
                                         <Input
                                             type="number"
                                             placeholder="e.g. 2022"
@@ -556,6 +530,7 @@ const CreateCars = () => {
                                                     e.target.value = e.target.value.slice(0, 4);
                                                 }
                                             }}
+                                            className="bg-emerald-900 border-emerald-800 text-white placeholder:text-slate-400"
                                         />
                                     </div>
                                 </div>
@@ -563,15 +538,16 @@ const CreateCars = () => {
                                 {/* 🧩 Engine, Horsepower, Transmission */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="engine">Engine Type</Label>
+                                        <Label htmlFor="engine" className="text-gray-300">Engine Type</Label>
                                         <Select
                                             value={engine}
                                             onValueChange={(value) => setEngine(value)}
                                         >
-                                            <SelectTrigger className="w-full">
+                                            <SelectTrigger className="w-full bg-emerald-900 border-emerald-700/70 text-white">
                                                 <SelectValue placeholder="Select engine type" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="bg-emerald-900 border-emerald-700/70 text-white"
+                                            >
                                                 <SelectItem value="V4">V4</SelectItem>
                                                 <SelectItem value="V6">V6</SelectItem>
                                                 <SelectItem value="V8">V8</SelectItem>
@@ -585,26 +561,25 @@ const CreateCars = () => {
 
                                         {engine === "Custom" && (
                                             <Input
-                                                className="mt-2"
                                                 type="text"
                                                 placeholder="Enter custom engine type"
                                                 value={engine === "Custom" ? "" : engine}
                                                 onChange={(e) => setEngine(e.target.value)}
+                                                className="mt-2 bg-emerald-900 border-emerald-800 text-white placeholder:text-slate-400"
                                             />
                                         )}
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="horsepower">Horsepower (HP)</Label>
+                                        <Label htmlFor="horsepower" className="text-gray-300">Horsepower (HP)</Label>
                                         <Select
                                             value={horsepower}
                                             onValueChange={(value) => setHorsepower(value)}
                                         >
-                                            <SelectTrigger className="w-full">
+                                            <SelectTrigger className="w-full bg-emerald-900 border-emerald-700/70 text-white">
                                                 <SelectValue placeholder="Select horsepower range" />
                                             </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="100">Up to 100 HP</SelectItem>
+                                            <SelectContent className="bg-emerald-900 border-emerald-700/70 text-white">                                                <SelectItem value="100">Up to 100 HP</SelectItem>
                                                 <SelectItem value="670">670 HP</SelectItem>
                                                 <SelectItem value="1200">1200 HP</SelectItem>
                                                 <SelectItem value="370">370 HP</SelectItem>
@@ -617,7 +592,7 @@ const CreateCars = () => {
                                         </Select>
                                         {horsepower === "Custom" && (
                                             <Input
-                                                className="mt-2"
+                                                className="mt-2 bg-emerald-900 border-emerald-800 text-white placeholder:text-slate-400"
                                                 type="number"
                                                 placeholder="Enter custom horsepower"
                                                 onChange={(e) => setHorsepower(e.target.value)}
@@ -626,48 +601,43 @@ const CreateCars = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="transmission">Transmission</Label>
+                                        <Label htmlFor="transmission" className="text-gray-300">
+                                            Transmission
+                                        </Label>
+
                                         <Select
                                             value={transmission}
                                             onValueChange={(value) => setTransmission(value)}
                                         >
-                                            <SelectTrigger className="w-full">
+                                            <SelectTrigger className="w-full bg-emerald-900 border-emerald-700/70 text-white">
                                                 <SelectValue placeholder="Select Transmission" />
                                             </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="MANUAL">Auto</SelectItem>
-                                                <SelectItem value="AUTOMATIC">Manuille</SelectItem>
-                                                {/* <SelectItem value="manuille">Manuille</SelectItem> */}
-                                                {/* <SelectItem value="Custom">Custom (enter manually)</SelectItem> */}
+
+                                            <SelectContent className="bg-emerald-900 border-emerald-700/70 text-white">
+                                                <SelectItem value="MANUAL">Manual</SelectItem>
+                                                <SelectItem value="AUTOMATIC">Automatic</SelectItem>
+                                                <SelectItem value="SEMI_AUTOMATIC">Semi-Automatic</SelectItem>
                                             </SelectContent>
                                         </Select>
-                                        {/* {transmission === "Custom" && (
-                                            <Input
-                                                className="mt-2"
-                                                type="text"
-                                                placeholder="Enter Transmission"
-                                                onChange={(e) => setTransmission(e.target.value)}
-                                            />
-                                        )} */}
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>Description</Label>
+                                    <Label className="text-gray-300">Description</Label>
                                     <Textarea
                                         placeholder="Enter car details..."
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
-                                        className="w-[80%] p-3 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+                                        className="w-[80%] min-h-[100px] p-3 rounded-lg focus:ring-2 bg-emerald-900 border-emerald-800 text-white placeholder:text-slate-400 resize-none"
                                     />
                                 </div>
 
                                 {/* Images Dropzone */}
                                 <div className="space-y-2">
-                                    <Label>Car Images ({images.length}/4)</Label>
+                                    <Label className="text-gray-300">Car Images ({images.length}/4)</Label>
                                     <div
                                         {...getRootProps()}
-                                        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all ${isDragActive ? "border-primary bg-primary/10" : "border-gray-300"}`}
+                                        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all ${isDragActive ? "border-emerald-700 bg-primary/10" : "border-emerald-600"}`}
                                     >
                                         <input {...getInputProps()} />
                                         {uploading ? (
@@ -683,8 +653,8 @@ const CreateCars = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Upload className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
-                                                <p className="text-sm font-medium">Drag & drop or click to select</p>
+                                                <Upload className="w-10 h-10 mx-auto mb-2 text-slate-100" />
+                                                <p className="text-sm font-medium text-slate-300">Drag & drop or click to select</p>
                                                 <p className="text-xs text-muted-foreground">
                                                     PNG, JPG up to 10MB • Max {4 - images.length} more
                                                 </p>
@@ -701,7 +671,7 @@ const CreateCars = () => {
                                                         alt={`Car image ${i + 1}`}
                                                         width={150}
                                                         height={150}
-                                                        className="w-full h-32 object-cover rounded-md border"
+                                                        className="w-full h-32 object-cover rounded-md border border-emerald-700"
                                                     />
                                                     <Button
                                                         type="button"
@@ -737,25 +707,25 @@ const CreateCars = () => {
                     </Card>
 
                     {(name || description || pricePerDay || selectedCategoryId || selectedModelId) && (
-                        <Card className="mt-4 bg-yellow-50">
+                        <Card className="mt-4 bg-emerald-800">
                             <CardHeader>
-                                <CardTitle>Preview</CardTitle>
-                                <CardDescription>This is how your products item will appear</CardDescription>
+                                <CardTitle className="text-slate-100">Preview</CardTitle>
+                                <CardDescription className="text-slate-300">This is how your products item will appear</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {name && <h3 className="text-xl font-semibold">{name}</h3>}
-                                    {description && <p className="text-muted-foreground">{description}</p>}
+                                    {name && <h3 className="text-xl font-semibold text-white">{name}</h3>}
+                                    {description && <p className="text-slate-300">{description}</p>}
                                     <div className="flex flex-wrap gap-2">
                                         {selectedCategoryId && (
                                             <Badge variant="secondary">Category: {categories.find((c) => c.id === selectedCategoryId)?.name}</Badge>
                                         )}
                                         {selectedModelId && (
-                                            <Badge variant="outline">Model: {models.find((m) => m.brand === selectedModelId)?.brand}</Badge>
+                                            <Badge >Model: {models.find((m) => m.brand === selectedModelId)?.brand}</Badge>
                                         )}
-                                        {pricePerDay && <Badge variant="outline">Price: ${pricePerDay}</Badge>}
-                                        {discount && <Badge variant="outline">Discount: {discount}%</Badge>}
-                                        {stock && <Badge variant="outline">Quantity: {stock}</Badge>}
+                                        {pricePerDay && <Badge >Price: ${pricePerDay}</Badge>}
+                                        {discount && <Badge >Discount: {discount}%</Badge>}
+                                        {stock && <Badge >Quantity: {stock}</Badge>}
                                         <Badge
                                             className={
                                                 status === "available"
@@ -768,7 +738,7 @@ const CreateCars = () => {
                                             {status}
                                         </Badge>
                                         {images.length > 0 && (
-                                            <Badge variant="outline">{images.length} image{images.length !== 1 ? "s" : ""}</Badge>
+                                            <Badge >{images.length} image{images.length !== 1 ? "s" : ""}</Badge>
                                         )}
                                     </div>
                                 </div>

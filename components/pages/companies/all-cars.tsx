@@ -25,8 +25,6 @@ interface PaginationInfo {
     totalCount: number;
     pageSize: number;
 }
-
-
 export default function MyCarsPage({ carItems }: CarItemsProps) {
     const [carsItems, setCarItems] = useState<ItemsCarsWithAlll[]>(carItems);
     const [searchQuery, setSearchQuery] = useState("")
@@ -42,7 +40,6 @@ export default function MyCarsPage({ carItems }: CarItemsProps) {
         totalCount: carItems.length,
         pageSize: CARS_PER_PAGE,
     });
-
 
     const filteredCars = carsItems.filter((car) => {
         const carName = car?.name?.toLowerCase() || ""
@@ -91,13 +88,15 @@ export default function MyCarsPage({ carItems }: CarItemsProps) {
             <CompanyHeader title="My Cars" description="Manage your vehicle inventory" />
             <main className="flex flex-1 flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
-                    <Badge className="text-sm text-gray-500">
+                    <Badge className="text-sm text-slate-300 bg-emerald-800">
                         {filteredCars.length} vehicles • {filteredCars.filter((c) => c.status === "AVAILABLE").length} available
                     </Badge>
 
                     <Link href={"/company/cars/new"}>
-                        <Button className="hover:cursor-pointer">
-                            <Plus className="mr-2 size-4" />
+                        <Button
+                            variant="outline"
+                            className="hover:cursor-pointer bg-emerald-800 hover:bg-emerald-900 text-white hover:text-white border-emerald-700">
+                            <Plus className="mr-2 animate-pulse" />
                             Add New Car
                         </Button>
                     </Link>
@@ -110,41 +109,42 @@ export default function MyCarsPage({ carItems }: CarItemsProps) {
                             placeholder="Search by customer or car..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9 bg-amber-700 border-amber-600 text-white placeholder:text-white/70 focus:ring-2 focus:ring-amber-600"
+                            className="pl-9 bg-emerald-800 border-emerald-700 text-white placeholder:text-white/70 focus:ring-2 focus:ring-emerald-600"
                         />
                     </div>
-                    <Select value={typeFilter} onValueChange={setTypeFilter}>
-                        <SelectTrigger className="w-full sm:w-[180px] bg-amber-700 border-amber-600 text-white">
-                            <SelectValue placeholder="Filter by type" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-amber-900 border-amber-700 text-white">
-                            <SelectItem value="all">All Types</SelectItem>
-                            {/* {Array.from(new Set(carsItems.map(c => c.model?.name))).map(model => (
-                                <SelectItem key={model} value={model}>{model}</SelectItem>
-                            ))} */}
-                            {Array.from(new Set(carsItems.map(c => c.model?.name).filter(Boolean) as string[]))
-                                .map(model => (
-                                    <SelectItem key={model} value={model} className="hover:cursor-pointer">{model}</SelectItem>
-                                ))}
-                        </SelectContent>
-                    </Select>
 
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-full sm:w-[180px] bg-amber-700 border-amber-600 text-white">
-                            <SelectValue placeholder="Filter by status" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-amber-900 border-amber-700 text-white">
-                            <SelectItem value="all" className="hover:cursor-pointer">All Status</SelectItem>
-                            <SelectItem value="AVAILABLE" className="hover:cursor-pointer">Available</SelectItem>
-                            <SelectItem value="RENTED" className="hover:cursor-pointer">Rented</SelectItem>
-                            <SelectItem value="MAINTENANCE" className="hover:cursor-pointer">Maintenance</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <div className="flex gap-3">
+                        <Select value={typeFilter} onValueChange={setTypeFilter}>
+                            <SelectTrigger className="w-full sm:w-[180px] bg-emerald-800 border-emerald-700 text-white">
+                                <SelectValue placeholder="Filter by type" />
+                            </SelectTrigger>
+
+                            <SelectContent className="bg-emerald-900 border-emerald-700 text-white">
+                                <SelectItem value="all">All Types</SelectItem>
+                                {Array.from(new Set(carsItems.map(c => c.model?.name).filter(Boolean) as string[]))
+                                    .map(model => (
+                                        <SelectItem key={model} value={model} className="hover:cursor-pointer">{model}</SelectItem>
+                                    ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-full sm:w-[180px] bg-emerald-800 border-emerald-700 text-white">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-emerald-900 border-emerald-800 text-white">
+                                <SelectItem value="all" className="hover:cursor-pointer">All Status</SelectItem>
+                                <SelectItem value="AVAILABLE" className="hover:cursor-pointer">Available</SelectItem>
+                                <SelectItem value="RENTED" className="hover:cursor-pointer">Rented</SelectItem>
+                                <SelectItem value="MAINTENANCE" className="hover:cursor-pointer">Maintenance</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredCars.map((car) => (
-                        <Card key={car.id} className="bg-amber-800 text-white">
+                        <Card key={car.id} className="bg-emerald-800 text-slate-100">
                             <CardHeader className="p-0">
                                 {car.images?.[0]?.imageUrl ? (
                                     <div className="w-full h-40 overflow-hidden rounded-t-lg group">
@@ -153,7 +153,7 @@ export default function MyCarsPage({ carItems }: CarItemsProps) {
                                             alt={car.name || "Car Image"}
                                             width={500}
                                             height={300}
-                                            className="w-full h-full object-cover hover:cursor-pointer transition-transform duration-700 group-hover:scale-150"  // <<< يضمن ملاءمة الصورة بدون تشويه
+                                            className="w-full h-full object-cover hover:cursor-pointer transition-transform duration-700 group-hover:scale-150"
                                         />
                                     </div>
                                 ) : (
@@ -166,14 +166,14 @@ export default function MyCarsPage({ carItems }: CarItemsProps) {
                             <CardContent className="pt-2">
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <CardTitle className="lg:text-lg text-[1rem]">{car.name}</CardTitle>
-                                        <p className="text-sm text-gray-400">
+                                        <CardTitle className="lg:text-lg text-[1rem] text-slate-100">{car.name}</CardTitle>
+                                        <p className="text-sm text-slate-300">
                                             {car.category?.name} • {car.year}
                                         </p>
                                     </div>
                                     <Badge variant={car.status === "AVAILABLE" ? "default" : car.status === "RENTED" ? "destructive" : "outline"}>{car.status}</Badge>
                                 </div>
-                                <p className="mt-4 lg:text-xl text-lg font-bold">{car.pricePerDay} TND/day</p>
+                                <p className="mt-4 lg:text-xl text-sm font-bold text-emerald-100">{car.pricePerDay} TND/day</p>
                             </CardContent>
 
                             <CardFooter className="flex items-center justify-center gap-2">
@@ -181,7 +181,7 @@ export default function MyCarsPage({ carItems }: CarItemsProps) {
                                     Remove
                                 </Button>
 
-                                <Link href={""}>
+                                <Link href={""} >
                                     <Button variant={"outline"} className="group hover:cursor-pointer">
                                         <ExternalLink className="text-black group-hover:translate-x-2 group-hover:-translate-y-2 flex-1 duration-500" />
                                     </Button>

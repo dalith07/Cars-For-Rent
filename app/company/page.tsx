@@ -29,6 +29,7 @@ import {
 import { Car, Users, DollarSign, Search } from "lucide-react";
 import AnimatedCounter from "@/components/ui/animated-counter";
 import { getCompanyDashboardData } from "@/actions/company/cars";
+import { cn } from "@/lib/utils";
 
 type DashboardStats = {
     totalCars: number;
@@ -101,26 +102,31 @@ export default function CompanyDashboard() {
             value: stats.totalCars,
             icon: Car,
             description: "All company cars",
+            iconColor: "text-purple-400",
         },
         {
             title: "Available Cars",
             value: stats.availableCars,
             icon: Car,
             description: "Ready to rent",
+            iconColor: "text-emerald-400",
         },
         {
             title: "Active Rentals",
             value: stats.activeRentals,
             icon: Users,
             description: "Currently rented",
+            iconColor: "text-blue-400",
         },
         {
             title: "Total Revenue",
             value: stats.totalRevenue,
             icon: DollarSign,
             description: "Completed rentals",
+            iconColor: "text-amber-400",
         },
     ];
+
 
     return (
         <div className="flex flex-1 flex-col">
@@ -133,15 +139,17 @@ export default function CompanyDashboard() {
                 {/* STATS */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {dashboardStats.map((stat) => (
-                        <Card key={stat.title} className="bg-amber-800 text-white">
+                        <Card key={stat.title} className="bg-emerald-800 border-emerald-700 text-accent hover:bg-emerald-900 hover:cursor-pointer duration-500 group">
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium">
+                                <CardTitle className="text-sm font-medium text-slate-100">
                                     {stat.title}
                                 </CardTitle>
-                                <stat.icon size={24} className="text-gray-300" />
+                                <stat.icon size={24} className={cn("group-hover:scale-125 duration-500", stat.iconColor)}
+                                />
                             </CardHeader>
+
                             <CardContent>
-                                <div className="text-2xl font-bold">
+                                <div className="text-2xl font-bold text-accent">
                                     <AnimatedCounter value={stat.value} />
                                 </div>
                                 <p className="text-xs text-gray-400 mt-1">
@@ -155,7 +163,7 @@ export default function CompanyDashboard() {
                 {/* ORDERS */}
                 <Card className="bg-emerald-800 text-white">
                     <CardHeader>
-                        <CardTitle>Recent Orders</CardTitle>
+                        <CardTitle className="text-gray-400">Recent Orders :</CardTitle>
 
                         <div className="flex flex-col gap-3 pt-4 sm:flex-row">
                             <div className="relative flex-1">
@@ -164,7 +172,7 @@ export default function CompanyDashboard() {
                                     placeholder="Search by customer or car..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-9 bg-amber-700 border-amber-600 text-white placeholder:text-white/70 focus:ring-2 focus:ring-amber-600"
+                                    className="pl-9 bg-emerald-900 border-emerald-700/70 text-white placeholder:text-white/70 focus:ring-2 focus:ring-amber-600"
                                 />
                             </div>
 
@@ -172,10 +180,10 @@ export default function CompanyDashboard() {
                                 value={statusFilter}
                                 onValueChange={setStatusFilter}
                             >
-                                <SelectTrigger className="w-full sm:w-[180px] bg-amber-700 border-amber-600">
+                                <SelectTrigger className="w-full sm:w-[180px] bg-emerald-900 border-emerald-700/70">
                                     <SelectValue placeholder="Filter by status" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-amber-900 border-amber-700 text-white">
+                                <SelectContent className="bg-emerald-900 border-emerald-700/70 text-white">
                                     <SelectItem value="all" className="hover:cursor-pointer">All</SelectItem>
                                     <SelectItem value="PENDING" className="hover:cursor-pointer">Pending</SelectItem>
                                     <SelectItem value="ACCEPTED" className="hover:cursor-pointer">Accepted</SelectItem>
@@ -189,8 +197,8 @@ export default function CompanyDashboard() {
 
                     <CardContent className="overflow-x-auto">
                         <Table>
-                            <TableHeader className="bg-amber-700">
-                                <TableRow className="hover:bg-amber-800">
+                            <TableHeader className="bg-emerald-700">
+                                <TableRow className="hover:bg-emerald-800">
                                     <TableHead className="text-white">Customer</TableHead>
                                     <TableHead className="text-white">Car</TableHead>
                                     <TableHead className="text-white">Period</TableHead>

@@ -147,18 +147,6 @@ export default function RegisterPage() {
                     </Button>
                 </form>
             </Form>
-            {/* BOTTOM LINKS */}
-            {/* <div className="text-center mt-6 text-gray-400 text-sm">
-                <p>
-                    Already have an account?{" "}
-                    <Link
-                        href="/signin"
-                        className="text-blue-400 hover:text-blue-300 transition"
-                    >
-                        Sign In
-                    </Link>
-                </p>
-            </div> */}
         </CardWrapper>
     );
 }

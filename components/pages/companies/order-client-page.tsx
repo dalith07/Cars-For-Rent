@@ -93,7 +93,7 @@ export default function OrdersClientPage({ orders }: OrderUserProps) {
             <main className="flex flex-1 flex-col gap-6 p-6">
                 {/* Stats Cards */}
                 <div className="grid gap-4 md:grid-cols-3">
-                    <Card className="bg-amber-800 text-white">
+                    <Card className="bg-emerald-800 text-white">
                         <CardHeader className="pb-3">
                             <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
                         </CardHeader>
@@ -102,7 +102,7 @@ export default function OrdersClientPage({ orders }: OrderUserProps) {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-amber-800 text-white">
+                    <Card className="bg-emerald-800 text-white">
                         <CardHeader className="pb-3">
                             <CardTitle className="text-sm font-medium">Active Rentals</CardTitle>
                         </CardHeader>
@@ -111,7 +111,7 @@ export default function OrdersClientPage({ orders }: OrderUserProps) {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-amber-800 text-white">
+                    <Card className="bg-emerald-800 text-white">
                         <CardHeader className="pb-3">
                             <CardTitle className="text-sm font-medium">Completed</CardTitle>
                         </CardHeader>
@@ -122,7 +122,7 @@ export default function OrdersClientPage({ orders }: OrderUserProps) {
                 </div>
 
                 {/* Orders Table */}
-                <Card className="bg-amber-800 text-white">
+                <Card className="bg-emerald-800 text-white">
                     <CardHeader>
                         <CardTitle>All Orders</CardTitle>
                         <div className="flex flex-col gap-3 pt-4 sm:flex-row">
@@ -132,15 +132,15 @@ export default function OrdersClientPage({ orders }: OrderUserProps) {
                                     placeholder="Search by customer or car..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-9 bg-amber-700 border-amber-600 text-white placeholder:text-white/70 focus:ring-2 focus:ring-amber-600"
+                                    className="pl-9 bg-emerald-700 border-emerald-600 text-white placeholder:text-white/70 focus:ring-2 focus:ring-amber-600"
                                 />
                             </div>
 
                             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                                <SelectTrigger className="w-full sm:w-[180px] bg-amber-700 border-amber-600">
+                                <SelectTrigger className="w-full sm:w-[180px] bg-emerald-700 border-emerald-600">
                                     <SelectValue placeholder="Filter by status" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-amber-900 border-amber-700 text-white">
+                                <SelectContent className="bg-emerald-900 border-emerald-700 text-white">
                                     <SelectItem value="all" className="hover:cursor-pointer">All Status</SelectItem>
                                     <SelectItem value="PENDING" className="hover:cursor-pointer">Pending</SelectItem>
                                     <SelectItem value="ACCEPTED" className="hover:cursor-pointer">Accepted</SelectItem>
@@ -153,8 +153,8 @@ export default function OrdersClientPage({ orders }: OrderUserProps) {
 
                     <CardContent className="overflow-x-auto">
                         <Table>
-                            <TableHeader className="bg-amber-700">
-                                <TableRow className="hover:bg-amber-800">
+                            <TableHeader className="bg-emerald-700">
+                                <TableRow className="hover:bg-emerald-800">
                                     <TableHead className="text-white">Order Number</TableHead>
                                     <TableHead className="text-white">Customer</TableHead>
                                     <TableHead className="text-white">Start Date</TableHead>
