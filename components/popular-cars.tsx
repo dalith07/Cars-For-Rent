@@ -1,11 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Fuel, Gauge, Timer } from "lucide-react";
+import { Car, CheckCircle, ExternalLink, Wrench } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useLanguage } from "@/app/language-provider";
+import { TbEngine } from "react-icons/tb";
+import { GiHorseHead } from "react-icons/gi";
+import { CarStatus } from "@prisma/client";
 
 interface Car {
     id: string;
@@ -15,7 +20,7 @@ interface Car {
     fuel: string;
     speed: string;
     discount?: string;
-    available: string;
+    status: CarStatus;
 }
 
 interface PopularCarsProps {
@@ -26,6 +31,8 @@ const BATCH_SIZE = 3;
 const INTERVAL_TIME = 5000;
 
 export default function PopularCars({ cars }: PopularCarsProps) {
+    const { t } = useLanguage();
+
     const [startIndex, setStartIndex] = useState(0);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -53,101 +60,108 @@ export default function PopularCars({ cars }: PopularCarsProps) {
 
     const carsToShow = cars.slice(startIndex, startIndex + BATCH_SIZE);
 
+    const statusConfig: Record<CarStatus, {
+        label: string;
+        color: string;
+        icon: any;
+    }> = {
+        AVAILABLE: { label: "Available", color: "text-green-500", icon: CheckCircle },
+        RENTED: { label: "Rented", color: "text-red-500", icon: Car },
+        MAINTENANCE: { label: "Maintenance", color: "text-orange-500", icon: Wrench },
+    };
+
     return (
         <section className="py-20 bg-muted/30 dark:bg-black/5 backdrop-blur-xs">
             <div className="container mx-auto px-6">
 
                 <h2 className="text-4xl font-bold text-center mb-12 text-foreground">
-                    New Cars Available <span className="text-yellow-500 dark:text-yellow-500">For Rent</span>
+                    {t("popularTitle")} <span className="text-yellow-500 dark:text-yellow-500"> {t("popularTitleHighlighted")}</span>
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
 
-                    {carsToShow.map((_, cardIndex) => (
-                        <motion.div
-                            key={cardIndex}
-                            onMouseEnter={stopInterval}   // ✅ pause
-                            onMouseLeave={startInterval} // ✅ resume
-                            whileHover={{
-                                y: -8,
-                                scale: 1.03,
-                                // boxShadow: "0px 0px 35px rgba(31,41,55)",
-                            }}
-                            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                            className="relative border border-border rounded-2xl p-6 
-                            backdrop-blur-sm bg-card group hover:bg-accent/50 dark:hover:bg-primary/15
-                             duration-500 cursor-pointer"
-                        >
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={carsToShow[cardIndex]?.name}
-                                    initial={{ opacity: 0, y: 25 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -25 }}
-                                    transition={{ duration: 0.45 }}
-                                >
-                                    {carsToShow[cardIndex] && (
+                    {carsToShow.map((car, cardIndex) => {
+                        const status = statusConfig[car.status];
+                        const StatusIcon = status.icon;
+
+                        return (
+                            <motion.div
+                                key={cardIndex}
+                                onMouseEnter={stopInterval}
+                                onMouseLeave={startInterval}
+                                whileHover={{ y: -8, scale: 1.03 }}
+                                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                                className="relative border border-border rounded-2xl p-6 
+      backdrop-blur-sm bg-card group hover:bg-accent/50 dark:hover:bg-primary/15
+      duration-500 cursor-pointer"
+                            >
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={car.name}
+                                        initial={{ opacity: 0, y: 25 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -25 }}
+                                        transition={{ duration: 0.45 }}
+                                    >
                                         <>
-                                            {/* Discount */}
-                                            {carsToShow[cardIndex].discount && (
+                                            {car.discount && (
                                                 <span className="absolute top-4 right-4 px-3 py-1 text-xs font-bold rounded-full
-                                                bg-linear-to-r from-red-500 to-pink-500 text-white shadow-lg animate-pulse">
-                                                    {carsToShow[cardIndex].discount} OFF
+              bg-linear-to-r bg-accent-foreground text-accent shadow-lg animate-bounce">
+                                                    {car.discount} OFF
                                                 </span>
                                             )}
 
-                                            {/* Link go to car by id */}
-                                            <Link href={`/market-cars/${carsToShow[cardIndex].id}`}>
-                                                <span
-                                                    className="absolute bottom-4 right-4 text-xs font-bold
-                                                text-blue-400/80 opacity-0 group-hover:opacity-100
-                                                group-hover:-translate-y-1.5 group-hover:translate-x-1.5
-                                                group-hover:scale-110 duration-500"
-                                                >
+                                            <Link href={`/market-cars/${car.id}`}>
+                                                <span className="absolute bottom-4 right-4 text-xs font-bold
+              text-blue-400 opacity-0 group-hover:opacity-100
+              group-hover:-translate-y-1.5 group-hover:translate-x-1.5
+              group-hover:scale-110 duration-500">
                                                     <ExternalLink />
                                                 </span>
                                             </Link>
 
-                                            {/* Image */}
-                                            <div className="flex justify-center mb-4">
-                                                <div className="w-[170px] h-[110px] relative">
+                                            <div className="flex justify-center mb-4 group">
+                                                <div className="w-[170px] h-[110px] group-hover:scale-150 duration-500 relative">
                                                     <Image
-                                                        src={carsToShow[cardIndex].img}
-                                                        alt={carsToShow[cardIndex].name}
+                                                        src={car.img}
+                                                        alt={car.name}
                                                         fill
                                                         className="object-contain"
                                                     />
                                                 </div>
                                             </div>
 
-                                            <h3 className="text-2xl font-semibold text-card-foreground text-center">
-                                                {carsToShow[cardIndex].name}
+                                            <h3 className="text-2xl font-bold text-center">
+                                                {car.name}
                                             </h3>
 
-                                            <p className="text-center text-primary dark:text-purple-300 mt-2 text-lg font-bold">
-                                                {carsToShow[cardIndex].price}
+                                            <p className="text-center text-primary mt-2 text-lg font-bold">
+                                                {car.price}
                                             </p>
 
-                                            <div className="mt-4 space-y-3 text-muted-foreground dark:text-white/80">
-                                                <div className="flex gap-3">
-                                                    <Fuel className="text-yellow-500" />
-                                                    Fuel: {carsToShow[cardIndex].fuel}
+                                            <div className="mt-4 space-y-3 text-muted-foreground">
+                                                <div className="flex gap-2">
+                                                    <TbEngine size={28} className="text-yellow-500" />
+                                                    Engine: {car.fuel}
                                                 </div>
-                                                <div className="flex gap-3">
-                                                    <Gauge className="text-yellow-500" />
-                                                    Speed: {carsToShow[cardIndex].speed}
+
+                                                <div className="flex gap-2">
+                                                    <GiHorseHead size={24} className="text-yellow-500" />
+                                                    Horse Power: {car.speed}
                                                 </div>
-                                                <div className="flex gap-3">
-                                                    <Timer className="text-yellow-500" />
-                                                    Available: {carsToShow[cardIndex].available}
+
+                                                <div className="flex gap-2 font-semibold items-center">
+                                                    <StatusIcon className="text-yellow-500" />
+                                                    <span className={status.color}>{status.label}</span>
                                                 </div>
                                             </div>
                                         </>
-                                    )}
-                                </motion.div>
-                            </AnimatePresence>
-                        </motion.div>
-                    ))}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </motion.div>
+                        );
+                    })}
+
 
                 </div>
             </div>

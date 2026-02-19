@@ -7,9 +7,210 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==========================
-// ENUMS
-// ==========================
+model Log {
+  id        String   @id @default(cuid())
+  type      LogType
+  message   String
+  details   Json?
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id               String         @id @default(cuid())
+  name             String?
+  email            String?        @unique
+  emailVerified    DateTime?      @map("email_verified")
+  image            String?
+  password         String?
+  role             UserRole       @default(USER)
+  status           UserStatus     @default(ACTIVE)
+  isOnline         Boolean        @default(false)
+  lastSeen         DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  accounts         Account[]
+  company          Company?
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  sentMessages     Message[]      @relation("SentMessages")
+  messages         Message[]
+  notifications    Notification[]
+  orders           Order[]
+  profile          Profile?
+}
+
+model Message {
+  id         String        @id @default(cuid())
+  content    String
+  read       Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  status     MessageStatus @default(SENT)
+  senderId   String
+  receiverId String
+  userId     String?
+  receiver   User          @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User          @relation("SentMessages", fields: [senderId], references: [id])
+  user       User?         @relation(fields: [userId], references: [id])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Profile {
+  id            String   @id @default(cuid())
+  phoneNumber   String?
+  streetAddress String?
+  city          String?
+  postalCode    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id                 String           @id @default(cuid())
+  name               String
+  email              String
+  logo               String?
+  phone              String
+  city               String
+  address            String
+  lat                Float?
+  lng                Float?
+  location           String
+  description        String?
+  bankName           String?
+  bankAccount        String?
+  bankHolder         String?
+  registrationNumber String?
+  documentUrl        String?
+  status             CompanyStatus    @default(PENDING)
+  setupCompleted     Boolean          @default(false)
+  ownerId            String           @unique
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  companySettingsId  String?
+  cars               Car[]
+  settings           CompanySettings? @relation(fields: [companySettingsId], references: [id], onDelete: Cascade)
+  owner              User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  orders             Order[]
+}
+
+model CompanySettings {
+  id                   String    @id @default(cuid())
+  emailNotifications   Boolean   @default(true)
+  orderNotifications   Boolean   @default(true)
+  paymentNotifications Boolean   @default(true)
+  marketingEmails      Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  companies            Company[]
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique
+  cars Car[]
+}
+
+model Model {
+  id   String @id @default(cuid())
+  name String @unique
+  cars Car[]
+}
+
+model Car {
+  id           String         @id @default(cuid())
+  name         String
+  description  String?
+  pricePerDay  Float
+  stock        Int            @default(1)
+  discount     Float?         @default(0)
+  year         Int
+  engine       String
+  horsepower   Int
+  transmission Transmission   @default(MANUAL)
+  status       CarStatus      @default(AVAILABLE)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  companyId    String
+  categoryId   String?
+  modelId      String?
+  category     Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  model        Model?         @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  images       ImagesOnCars[]
+  orders       Order[]
+  orderCars    OrderCar[]
+}
+
+model ImagesOnCars {
+  id       String @id @default(cuid())
+  imageUrl String
+  carId    String
+  car      Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  orderNumber   String        @unique
+  startDate     DateTime
+  endDate       DateTime
+  totalDays     Int
+  totalPrice    Float
+  status        RentalStatus  @default(PENDING)
+  paymentStatus PaymentStatus @default(NOT_PAID)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userId        String
+  companyId     String
+  carId         String?
+  car           Car?          @relation(fields: [carId], references: [id])
+  company       Company       @relation(fields: [companyId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+  orderCars     OrderCar[]
+}
+
+model OrderCar {
+  id          String @id @default(cuid())
+  orderId     String
+  carId       String
+  pricePerDay Float
+  discount    Float? @default(0)
+  days        Int
+  totalPrice  Float
+  car         Car    @relation(fields: [carId], references: [id])
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, carId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 enum UserRole {
   USER
   COMPANY_OWNER
@@ -77,261 +278,4 @@ enum SetupStatus {
   PENDING
   IN_PROGRESS
   COMPLETED
-}
-
-model Log {
-  id        String   @id @default(cuid())
-  type      LogType
-  message   String
-  details   Json? // optional, for extra info like errors or user actions
-  createdAt DateTime @default(now())
-}
-
-// USER
-model User {
-  id            String     @id @default(cuid())
-  name          String?
-  email         String?    @unique
-  emailVerified DateTime?  @map("email_verified")
-  image         String?
-  password      String?
-  role          UserRole   @default(USER)
-  status        UserStatus @default(ACTIVE)
-
-  isOnline Boolean   @default(false)
-  lastSeen DateTime?
-
-  accounts      Account[]
-  profile       Profile?
-  company       Company?
-  orders        Order[]
-  notifications Notification[]
-  messages      Message[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 👇 العلاقات الصحيحة
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-}
-
-model Message {
-  id        String   @id @default(cuid())
-  content   String
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  status MessageStatus @default(SENT)
-
-  senderId   String
-  receiverId String
-
-  sender   User    @relation("SentMessages", fields: [senderId], references: [id])
-  receiver User    @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  user     User?   @relation(fields: [userId], references: [id])
-  userId   String?
-}
-
-// ACCOUNT (NextAuth)
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-// PROFILE
-model Profile {
-  id            String  @id @default(cuid())
-  phoneNumber   String?
-  streetAddress String?
-  city          String?
-  postalCode    String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-// COMPANY
-model Company {
-  id       String  @id @default(cuid())
-  name     String
-  email    String
-  logo     String?
-  phone    String
-  city     String
-  address  String
-  lat      Float?
-  lng      Float?
-  location String
-
-  // ✅ BANK INFO
-  description String?
-  bankName    String?
-  bankAccount String?
-  bankHolder  String?
-
-  // ✅ LEGAL INFO
-  registrationNumber String?
-  documentUrl        String?
-
-  // ✅ SETTINGS
-  status         CompanyStatus @default(PENDING)
-  setupCompleted Boolean       @default(false)
-
-  settings CompanySettings? @relation(fields: [companySettingsId], references: [id], onDelete: Cascade)
-
-  ownerId String @unique
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-
-  cars   Car[]
-  orders Order[]
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  companySettingsId String?
-}
-
-model CompanySettings {
-  id String @id @default(cuid())
-
-  emailNotifications   Boolean @default(true)
-  orderNotifications   Boolean @default(true)
-  paymentNotifications Boolean @default(true)
-  marketingEmails      Boolean @default(false)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  companies Company[]
-}
-
-// CATEGORY
-model Category {
-  id   String @id @default(cuid())
-  name String @unique
-
-  cars Car[]
-}
-
-// MODEL (CAR MODEL)
-model Model {
-  id   String @id @default(cuid())
-  name String @unique
-
-  cars Car[]
-}
-
-// CAR
-model Car {
-  id           String       @id @default(cuid())
-  name         String
-  description  String?
-  pricePerDay  Float
-  stock        Int          @default(1)
-  discount     Float?       @default(0)
-  year         Int
-  engine       String
-  horsepower   Int
-  transmission Transmission @default(MANUAL)
-  status       CarStatus    @default(AVAILABLE)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  modelId String?
-  model   Model?  @relation(fields: [modelId], references: [id], onDelete: Cascade)
-
-  images    ImagesOnCars[]
-  orders    Order[]
-  orderCars OrderCar[]
-}
-
-// CAR IMAGES
-model ImagesOnCars {
-  id       String @id @default(cuid())
-  imageUrl String
-
-  carId String
-  car   Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
-}
-
-// ORDER (RENTAL)
-model Order {
-  id          String @id @default(cuid())
-  orderNumber String @unique
-
-  startDate  DateTime
-  endDate    DateTime
-  totalDays  Int
-  totalPrice Float
-
-  status        RentalStatus  @default(PENDING)
-  paymentStatus PaymentStatus @default(NOT_PAID)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
-
-  orderCars OrderCar[]
-  car       Car?       @relation(fields: [carId], references: [id])
-  carId     String?
-}
-
-model OrderCar {
-  id String @id @default(cuid())
-
-  orderId String
-  carId   String
-
-  pricePerDay Float
-  discount    Float? @default(0)
-
-  days       Int
-  totalPrice Float
-
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  car   Car   @relation(fields: [carId], references: [id])
-
-  @@unique([orderId, carId])
-}
-
-// NOTIFICATION
-model Notification {
-  id      String           @id @default(cuid())
-  type    NotificationType
-  title   String
-  message String
-  read    Boolean          @default(false)
-
-  createdAt DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

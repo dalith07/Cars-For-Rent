@@ -17,6 +17,8 @@ import { getUserNotificationsCount } from "@/actions/dashboard/notifications"
 import { Dialog, DialogContent, } from "./ui/dialog"
 import UserChatPage from "./chats"
 import ThemeButton from "./dark-light-button"
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useLanguage } from "@/app/language-provider";
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -25,6 +27,8 @@ export default function Header() {
     const [openChat, setOpenChat] = useState(false)
     const [currentTextIndex, setCurrentTextIndex] = useState(0)
     const [notificationsCount, setNotificationsCount] = useState<number>(0);
+
+    const { t, dir } = useLanguage();
 
     const user = useCurrentUser();
 
@@ -102,6 +106,7 @@ export default function Header() {
                     ? "bg-white/5 dark:bg-black/70 border-black/5 dark:border-white/10"
                     : "bg-white dark:bg-black/30 border-black/5 dark:border-white/10"
             )}
+            dir={dir}
         >
             <nav className="container mx-auto sm:px-2 px-4 py-3 flex items-center justify-between">
                 {/* Logo or Mobile Menu Button */}
@@ -133,7 +138,7 @@ export default function Header() {
                             )}
                         >
                             <House className="mr-1" size={20} />
-                            Home
+                            {t("navbarHome")}
                         </Link>
 
                         <Link
@@ -144,7 +149,7 @@ export default function Header() {
                             )}
                         >
                             <Car className="mr-1" size={20} />
-                            Market Cars
+                            {t("navbarMarketCars")}
                         </Link>
 
                         <Link
@@ -155,7 +160,7 @@ export default function Header() {
                             )}
                         >
                             <Handshake className="mr-1" size={20} />
-                            Service
+                            {t("navbarService")}
                         </Link>
                         <div className="h-8 w-px bg-border dark:bg-zinc-200 hidden sm:block"></div>
 
@@ -170,7 +175,7 @@ export default function Header() {
                                 {orderCount ? orderCount : 0}
                             </span>
                             <ShoppingCart className="mr-1" size={20} />
-                            Your Orders
+                            {t("navbarYourOrders")}
                         </Link>
                     </div>
                 </div>
@@ -231,7 +236,7 @@ export default function Header() {
                     </Dialog>
 
                     {/* BUTTON LANGUAGE SWITCH */}
-                    {/* <LanguageSwitcher /> */}
+                    <LanguageSwitcher />
 
                     {/* BUTTON LIGHT & DAR MODE  */}
                     <ThemeButton />

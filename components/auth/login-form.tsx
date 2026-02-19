@@ -91,7 +91,7 @@ const LoginForm = () => {
                                             type="email"
                                             placeholder="john.doe@example.com"
                                             disabled={isPending}
-                                            className="bg-blue-600/10 border-blue-600/50 text-white focus:border-blue-600/70 duration-500 transition-colors pr-10"
+                                            className="bg-blue-600/10 border-blue-600/50 text-accent-foreground focus:border-blue-600/70 duration-500 transition-colors pr-10"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -111,7 +111,7 @@ const LoginForm = () => {
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="********"
                                                 disabled={isPending}
-                                                className="bg-blue-600/10 border-blue-600/50 text-white focus:border-blue-600/70 duration-500 transition-colors pr-10"
+                                                className="bg-blue-600/10 border-blue-600/50 text-accent-foreground focus:border-blue-600/70 duration-500 transition-colors pr-10"
                                             />
 
                                             <button

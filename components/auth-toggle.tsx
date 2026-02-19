@@ -10,13 +10,16 @@ import { signOut } from "next-auth/react";
 import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import { useCloseOnInteraction } from "@/hooks/useCloseOnInteraction";
+import { useLanguage } from "@/app/language-provider";
 
 export default function AuthToggle() {
     const [open, setOpen] = useState(false);
     const user = useCurrentUser();
+    const { t, dir } = useLanguage();
 
     // Reference to detect click outside
     const ref = useRef<HTMLDivElement>(null)
+    const buttonRef = useRef<HTMLButtonElement>(null);
 
     const playSound = () => {
         const audio = new Audio("/sounds/sound_mouse.mp3");
@@ -42,44 +45,56 @@ export default function AuthToggle() {
         isOpen: open,
         onClose: () => setOpen(false),
         elementRef: ref,
+        ignoreRefs: [buttonRef],
     })
 
     return (
-        <div className="relative">
-            {/* CART */}
+        <div ref={ref} className="relative">
+
             <button
+                ref={buttonRef}
                 onClick={() => {
                     playSound();
-                    setOpen(!open);
+                    setOpen(prev => !prev);
                 }}
                 className="inline-flex items-center justify-center
-                            w-11 h-11 rounded-full
-                            bg-white/10 text-gray-500
-                            hover:bg-blue-500/10 duration-500
-                            border border-gray-500/20 hover:cursor-pointer"
+               w-11 h-11 rounded-full
+               bg-white/10 text-gray-500
+               hover:bg-blue-500/10 duration-500
+               border border-gray-500/20 hover:cursor-pointer"
             >
-                {user?.image ?
-                    <Image src={user.image} alt="image" width={50} height={50}
+                {user?.image ? (
+                    <Image
+                        src={user.image}
+                        alt="image"
+                        width={50}
+                        height={50}
                         className="rounded-full w-full h-full"
                     />
-                    :
-                    <User size={22} />}
+                ) : (
+                    <User size={22} />
+                )}
 
-                {user?.role === "ADMIN" && <span
-                    className="absolute top-0 right-0 text-yellow-500"
-                >
-                    <FaStar size={15} className="animate-pulse" />
-                </span>}
+                {user?.role === "ADMIN" && (
+                    <span className="absolute top-0 right-0 text-yellow-500">
+                        <FaStar size={15} className="animate-pulse" />
+                    </span>
+                )}
             </button>
 
             {/* Dropdown Buttons */}
             {open && (
                 <motion.div
-                    ref={ref}
+                    dir={dir}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25 }}
-                    className="absolute z-50 right-0 mt-3 w-56 rounded-xl border bg-background shadow-lg p-4 "
+                    className={`
+    absolute z-50 mt-3
+    ${dir === "rtl" ? "left-0" : "right-0"}
+    min-w-[220px] w-max max-w-[90vw]
+    rounded-xl border bg-background shadow-lg p-4
+  `}
                 >
                     {user ? (
                         <div>
@@ -146,21 +161,19 @@ export default function AuthToggle() {
                         </div>
                     ) : (
                         <div>
-                            <h1 className="mb-4 text-sm font-medium text-accent-foreground">Create Compte</h1>
-
-                            <div className="h-px w-full bg-zinc-200 rounded-full mb-4 hidden sm:block"></div>
-
+                            <h1 className="mb-4 text-sm font-semibold text-accent-foreground">{t("authToggleTitleCreateCompte")}</h1>
+                            <div className="h-px w-full bg-zinc-400/20 dark:bg-slate-100/20 rounded-full mb-4 hidden sm:block"></div>
                             <div className="flex items-center justify-center gap-4">
-                                <Link href={"/auth/login"} >
+                                <Link href={"/auth/login"}>
                                     <Button
                                         className="w-full font-bold hover:cursor-pointer"
                                     >
-                                        Login
+                                        {t("authToggleButtonLogin")}
                                     </Button>
                                 </Link>
 
                                 <Link href={"/auth/register"}>
-                                    <Button variant="outline" className="w-full font-bold hover:cursor-pointer">Register</Button>
+                                    <Button variant="outline" className="w-full font-bold hover:cursor-pointer"> {t("authToggleButtonRegister")}</Button>
                                 </Link>
                             </div>
                         </div>

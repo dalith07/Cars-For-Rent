@@ -2,6 +2,7 @@
 
 import { Car, Shield, Timer, Droplet } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/app/language-provider";
 
 const cars = [
     {
@@ -30,12 +31,16 @@ const cars = [
     },
 ];
 
+
 // const iconVariants = {
 //     initial: { x: 0 },
 //     hover: { x: 40 },
 // };
 
 export default function CarsForRentSection() {
+
+    const { t } = useLanguage();
+
     return (
         // <section className="relative w-full py-24 px-6 bg-black/10 backdrop-blur-xl text-white">
         <section className="relative w-full py-24 px-6 bg-muted/30 dark:bg-black/5 backdrop-blur-xs text-foreground">
@@ -47,7 +52,8 @@ export default function CarsForRentSection() {
                     viewport={{ once: true }}
                     className="lg:text-5xl text-lg font-bold mb-4"
                 >
-                    Rent <span className="text-yellow-500 dark:text-yellow-500">Your Dream Car</span>
+                    {t("featuresTitle")}
+                    <span className="text-yellow-500 dark:text-yellow-500">{t("featuresTitleHighlighted")}</span>
                 </motion.h2>
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
@@ -56,7 +62,7 @@ export default function CarsForRentSection() {
                     viewport={{ once: true }}
                     className="text-muted-foreground dark:text-white/60 text-lg"
                 >
-                    Choose your car, see how long you can rent it, and enjoy exclusive features.
+                    {t("featuresSubtitle")}
                 </motion.p>
             </div>
 

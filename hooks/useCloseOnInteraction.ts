@@ -6,9 +6,15 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   elementRef: React.RefObject<HTMLElement | null>;
+  ignoreRefs?: React.RefObject<HTMLElement | null>[]; // 👈 أضفناها
 };
 
-export function useCloseOnInteraction({ isOpen, onClose, elementRef }: Props) {
+export function useCloseOnInteraction({
+  isOpen,
+  onClose,
+  elementRef,
+  ignoreRefs = [],
+}: Props) {
   const pathname = usePathname();
 
   // Close on outside click
@@ -16,22 +22,23 @@ export function useCloseOnInteraction({ isOpen, onClose, elementRef }: Props) {
     if (!isOpen) return;
 
     const handleClick = (e: MouseEvent) => {
-      if (
-        elementRef.current &&
-        !elementRef.current.contains(e.target as Node)
-      ) {
-        onClose();
+      const target = e.target as Node;
+
+      if (elementRef.current?.contains(target)) return;
+
+      for (const ref of ignoreRefs) {
+        if (ref.current?.contains(target)) return;
       }
+
+      onClose();
     };
 
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [isOpen, onClose, elementRef]);
+  }, [isOpen, onClose, elementRef, ...ignoreRefs]);
 
-  // Close on route change (any Link click)
+  // Close on route change
   useEffect(() => {
-    if (isOpen) {
-      onClose();
-    }
+    if (isOpen) onClose();
   }, [pathname]);
 }

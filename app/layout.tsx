@@ -7,6 +7,7 @@ import SessionWrapper from "@/components/SessionWrapper"
 import { CartProvider } from "@/lib/cart_context"
 import { Toaster } from "@/components/ui/sonner";
 import Loading from "./loading"
+import { LanguageProvider } from "./language-provider";
 
 const recursive = Recursive({
   subsets: ["latin"],
@@ -49,14 +50,17 @@ export default function RootLayout({
           }}
         />
         <SessionWrapper>
-          <CartProvider>
-            <main className="flex flex-col min-h-[calc(100vh-3.5rem-1px)]">
-              <Suspense fallback={<Loading />}>
-                {children}
-                <Toaster position="bottom-right" richColors={true} />
-              </Suspense>
-            </main>
-          </CartProvider>
+          <LanguageProvider>
+            <CartProvider>
+              <main className="flex flex-col min-h-[calc(100vh-3.5rem-1px)]">
+                <Suspense fallback={<Loading />}>
+                  {children}
+                  <Toaster position="bottom-right" richColors={true} />
+                </Suspense>
+              </main>
+            </CartProvider>
+          </LanguageProvider>
+
         </SessionWrapper>
       </body>
     </html>

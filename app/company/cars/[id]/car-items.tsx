@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 "use client";
 
 import { useCallback, useEffect, useState, } from "react";
@@ -11,7 +12,7 @@ import { useDropzone } from "react-dropzone";
 import { useUploadThing } from "@/lib/uploadthing";
 import { ImageIcon, Loader2, Minus, Plus, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, } from "@/components/ui/card";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
@@ -59,7 +60,6 @@ export default function CarItems({ carsItems }: carsItemsProps) {
     const [transmission, setTransmission] = useState(carsItems.transmission);
     const [stock, setStock] = useState(carsItems.stock?.toString() || "0");
     const [discount, setDiscount] = useState(carsItems.discount?.toString() || "0");
-    // const [status, setStatus] = useState<string>(carsItems.status);
     const [status, setStatus] = useState(carsItems.status || "AVAILABLE");
 
     const [images, setImages] = useState<ImageFileAndProductnWithImagesProps[]>([]);
@@ -422,22 +422,6 @@ export default function CarItems({ carsItems }: carsItemsProps) {
                                         />
                                     </div>
 
-                                    {/* <div className="space-y-2">
-                                    <Label htmlFor="engine">Version Type</Label>
-                                    <Select
-                                        value={version}
-                                        onValueChange={(value) => setVersion(value)}
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select engine type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="new">New</SelectItem>
-                                            <SelectItem value="occasion">Occasion</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div> */}
-
                                     <div className="space-y-2">
                                         <Label htmlFor="sold" className="text-slate-400">Stock:</Label>
                                         <Input
@@ -596,20 +580,9 @@ export default function CarItems({ carsItems }: carsItemsProps) {
                                         </Select>
                                     </div>
 
-
                                     <div className="space-y-2">
                                         <div className="space-y-2 " >
                                             <Label htmlFor="status" className="text-slate-400">Status</Label>
-                                            {/* <Select value={status} onValueChange={setStatus} >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select status" />
-                                            </SelectTrigger>
-                                            <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
-                                                <SelectItem value="available">Available</SelectItem>
-                                                <SelectItem value="rented">Rented</SelectItem>
-                                                <SelectItem value="maintenance">Maintenance</SelectItem>
-                                            </SelectContent>
-                                        </Select> */}
                                             <Select
                                                 value={status}
                                                 onValueChange={(value) => setStatus(value as "AVAILABLE" | "RENTED" | "MAINTENANCE")}

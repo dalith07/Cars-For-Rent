@@ -6,13 +6,11 @@ import PopularCars from "@/components/popular-cars";
 
 export default async function Home() {
     const dbCars = await getAllCarsWithCompany();
-    
-    // Handle case when database is unavailable during build
+
     if (!dbCars || dbCars.length === 0) {
         // Return empty cars array if database is unavailable
         // This allows the build to succeed and the page will work at runtime
     }
-
     const cars = dbCars.map(car => ({
         id: car.id,
         name: car.name,
@@ -21,7 +19,7 @@ export default async function Home() {
         fuel: car.engine || "Unknown",
         speed: car.horsepower ? `${car.horsepower} HP` : "N/A",
         discount: car.discount ? `${car.discount}%` : undefined,
-        available: car.status === "AVAILABLE" ? "Yes" : "No",
+        status: car.status, // ✅ enum from Prisma
     }));
 
     return (

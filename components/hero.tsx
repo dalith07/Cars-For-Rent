@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { Button } from "./ui/button";
+import { useLanguage } from "@/app/language-provider";
 
 const Hero = () => {
     const imageCars = [
@@ -19,6 +20,8 @@ const Hero = () => {
         "/cars/bmw_m5_e60_1.png",
         "/cars/bmw_m3_competition_1.png",
     ];
+
+    const { t } = useLanguage();
 
     const [bgImage, setBgImage] = useState(imageCars[0]);
     const [carIndex, setCarIndex] = useState(0);
@@ -138,24 +141,25 @@ const Hero = () => {
             {/* Main Content */}
             <div className="relative z-20 max-w-6xl text-center px-6 text-white">
                 <h1 className="text-4xl md:text-6xl font-bold 
-                mb-4 text-zinc-900 dark:text-white">
-                    Rent Your Dream Car <span className="text-yellow-500">Today</span>
+                mb-4 text-zinc-300 dark:text-white">
+                    {t("heroTitle")}
+                    <span className="text-yellow-500">{t("heroTitleHighlighted")}</span>
                 </h1>
 
                 <p className="text-gray-200 opacity-80 text-md md:text-xl mb-8">
-                    Find the perfect car for your journey. Fast, easy, and reliable.
+                    {t("heroSubtitle")}
                 </p>
 
                 <div className="flex gap-4 justify-center">
                     <Link href="#">
                         <Button size="lg" variant="secondary" className="hover:cursor-pointer">
-                            Explore Cars
+                            {t("heroExploreCars")}
                         </Button>
                     </Link>
 
                     <Link href="/market-cars">
                         <Button size="lg" className="hover:cursor-pointer">
-                            Rent a Car
+                            {t("heroRentCar")}
                         </Button>
                     </Link>
                 </div>
