@@ -1,14 +1,15 @@
 "use client";
 
+import { useLanguage } from "@/app/language-provider";
 import MapSection from "@/components/map-center";
 import { motion, } from "framer-motion";
 import { Car, Clock, Users, Wrench } from "lucide-react";
 
 const services = [
-    { icon: Car, title: "Wide Car Selection", description: "Choose from a variety of vehicles to suit your style, budget, and trip needs." },
-    { icon: Clock, title: "Flexible Rentals", description: "Rent by hour, day, or week. Our rental plans adapt to your schedule." },
-    { icon: Wrench, title: "Full Maintenance", description: "All our cars are fully serviced and maintained for your safety and comfort." },
-    { icon: Users, title: "Customer Support", description: "Our support team is ready 24/7 to help you with any questions or emergencies." },
+    { icon: Car, titleKey: "serviceCardWideSelectionTitle", descKey: "serviceCardWideSelectionDescription" },
+    { icon: Clock, titleKey: "serviceCardFlexibleRentalsTitle", descKey: "serviceCardFlexibleRentalsDescription" },
+    { icon: Wrench, titleKey: "serviceCardFullMaintenanceTitle", descKey: "serviceCardFullMaintenanceDescription" },
+    { icon: Users, titleKey: "serviceCardCustomerSupportTitle", descKey: "serviceCardCustomerSupportDescription" },
 ];
 
 
@@ -17,11 +18,15 @@ type MapCompany = {
     lat: number;
     lng: number;
 };
+
 export default function ServiceClient({
     companies,
 }: {
     companies: MapCompany[];
 }) {
+
+    const { t } = useLanguage();
+
     return (
         <div className="relative min-h-screen bg-black overflow-hidden">
             {/* Background blur circles */}
@@ -34,9 +39,9 @@ export default function ServiceClient({
                     initial={{ opacity: 0, y: -60 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
-                    className="text-5xl md:text-6xl font-extrabold mb-4"
+                    className="text-5xl md:text-6xl text-purple-600 font-extrabold mb-4"
                 >
-                    Our Services
+                    {t("serviceTitle")}
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0 }}
@@ -44,7 +49,7 @@ export default function ServiceClient({
                     transition={{ duration: 1.2 }}
                     className="text-gray-300 max-w-xl mx-auto mb-16"
                 >
-                    Experience hassle-free car rentals with premium services designed for comfort, flexibility, and peace of mind.
+                    {t("serviceSubtitle")}
                 </motion.p>
 
                 {/* Services Grid */}
@@ -73,13 +78,26 @@ export default function ServiceClient({
                                 >
                                     <Icon className="w-12 h-12 text-indigo-400" />
                                 </motion.div>
+                                <h3 className="text-[1.4rem] font-semibold text-white mb-2">
+                                    {t(service.titleKey)}
+                                </h3>
 
-                                <h3 className="text-[1.4rem] font-semibold mb-2">{service.title}</h3>
-                                <p className="text-gray-400 text-sm">{service.description}</p>
+                                <p className="text-gray-400 text-sm">
+                                    {t(service.descKey)}
+                                </p>
                             </motion.div>
                         );
                     })}
                 </div>
+
+                {/* <motion.h1
+                    initial={{ opacity: 0, y: -60 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1 }}
+                    className="text-4xl md:text-5xl text-purple-600 font-extrabold mt-8"
+                >
+                    This Location Company In Maps
+                </motion.h1> */}
 
                 {/* MAP 🔥 */}
                 <MapSection companies={companies} />

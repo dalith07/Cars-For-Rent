@@ -19,6 +19,7 @@ import UserChatPage from "./chats"
 import ThemeButton from "./dark-light-button"
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useLanguage } from "@/app/language-provider";
+import { Button } from "./ui/button";
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -177,6 +178,60 @@ export default function Header() {
                             <ShoppingCart className="mr-1" size={20} />
                             {t("navbarYourOrders")}
                         </Link>
+
+                        {/* Ai Chat */}
+                        {/* <Link
+                            href="/Ai-cars"
+                            className="relative inline-block"
+                        >
+                            <div className="absolute inset-0 rounded-lg bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 animate-gradient-x blur-lg opacity-70 transition-all duration-1000 group-hover:opacity-100"></div>
+
+                            <div className="absolute -inset-1 rounded-lg bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 opacity-50 blur-2xl animate-pulse"></div>
+
+                            <Button
+                                className="relative group flex items-center gap-2 px-6 py-3 rounded-lg bg-black hover:bg-transparent bg-opacity-30 text-white font-bold uppercase tracking-wider shadow-lg transition-transform duration-500
+               border border-white border-opacity-20 backdrop-blur-sm"
+                            >
+                                <svg
+                                    className="w-5 h-5 animate-bounce text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16h6" />
+                                </svg>
+                                Ask AI
+                            </Button>
+                        </Link> */}
+
+                        <Link href="/Ai-cars" className="relative inline-block group">
+                            {/* Animated Border */}
+                            <div className="absolute -inset-1 rounded-lg bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 blur-lg opacity-60 transition-all duration-500
+                  group-hover:opacity-100 animate-gradient-x "/>
+
+                            {/* Button */}
+                            <Button
+                                className="relative flex items-center gap-2 px-6 py-3 rounded-lg bg-black hover:bg-transparent bg-opacity-30 text-white font-bold uppercase tracking-wider shadow-lg
+                hover:border-white hover:border-opacity-20 transition-all duration-500
+              z-10 border border-white border-opacity-20 backdrop-blur-sm"
+                            >
+                                <svg
+                                    className="w-8 h-8 animate-bounce text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16h6" />
+                                </svg>
+                                Ask AI
+                            </Button>
+                        </Link>
+
+
                     </div>
                 </div>
 

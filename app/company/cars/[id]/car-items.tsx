@@ -75,7 +75,26 @@ export default function CarItems({ carsItems }: carsItemsProps) {
     const [selectedCategoryId, setSelectedCategoryId] = useState(carsItems.category?.name ?? "");
     const [selectedModelId, setSelectedModelId] = useState(carsItems.model?.name ?? "");
 
+    const [deleting, setDeleting] = useState(false);
+    const [deleteDialog, setDeleteDialog] = useState<{
+        open: boolean;
+        imageId?: string;
+        imageName?: string;
+    }>({ open: false });
+
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (deleteDialog.open) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [deleteDialog.open]);
 
     useEffect(() => {
         setCategories([
@@ -308,15 +327,26 @@ export default function CarItems({ carsItems }: carsItemsProps) {
     }, []);
 
     const handleDeleteImage = async (imageId: string) => {
-        const existsInDB = carsItems.images.some(img => img.id === imageId);
+        try {
+            setDeleting(true);
 
-        if (existsInDB) {
             const res = await deleteImageCarItemById(imageId);
-            if (!res.success) return toast.error("Failed deleting image");
-        }
 
-        setImages(prev => prev.filter(img => img.id !== imageId));
-        toast.success("Image deleted");
+            if (!res.success) {
+                toast.error(res.message || "Failed deleting image");
+                return;
+            }
+
+            setImages(prev => prev.filter(img => img.id !== imageId));
+
+            toast.success("Image deleted");
+
+        } catch (err) {
+            toast.error("Delete failed");
+        } finally {
+            setDeleting(false);
+            setDeleteDialog({ open: false });
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -858,14 +888,22 @@ export default function CarItems({ carsItems }: carsItemsProps) {
                                                             height={300}
                                                             className="w-full h-full object-cover rounded-lg border shadow-sm"
                                                         />
+
                                                         <Button
                                                             type="button"
-                                                            onClick={() => handleDeleteImage(image.id)}
+                                                            onClick={() =>
+                                                                setDeleteDialog({
+                                                                    open: true,
+                                                                    imageId: image.id,
+                                                                    imageName: "Car image",
+                                                                })
+                                                            }
                                                             variant="destructive"
                                                             className="absolute z-50 -top-2 right-0 h-8 w-8 rounded-full hover:cursor-pointer animate-pulse"
                                                         >
                                                             <X />
                                                         </Button>
+
                                                         <Badge variant="secondary" className="absolute bottom-1 left-1 text-xs">
                                                             {index + 1}
                                                         </Badge>
@@ -876,6 +914,52 @@ export default function CarItems({ carsItems }: carsItemsProps) {
                                         </div>
                                     )}
                                 </div>
+
+                                {/* ✅ DELETE CONFIRM MODAL */}
+                                {deleteDialog.open && (
+                                    <div className="fixed inset-0 z-9999 flex items-center justify-center">
+                                        {/* overlay */}
+                                        <div
+                                            className="absolute inset-0 h-screen bg-black/60 backdrop-blur-sm"
+                                            onClick={() => setDeleteDialog({ open: false })}
+                                        />
+
+                                        {/* card */}
+                                        <Card className="relative z-10 w-[350px] bg-emerald-950 border border-emerald-900 rounded-2xl p-6 shadow-2xl animate-in fade-in zoom-in-95">
+                                            <h2 className="text-lg font-semibold text-white mb-2">
+                                                Delete image?
+                                            </h2>
+
+                                            <p className="text-sm text-emerald-200 mb-6">
+                                                Are you sure you want to delete this image?
+                                                This action cannot be undone.
+                                            </p>
+
+                                            <div className="flex justify-end gap-3">
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() => setDeleteDialog({ open: false })}
+                                                    className="hover:bg-emerald-800"
+                                                >
+                                                    Cancel
+                                                </Button>
+
+                                                <Button
+                                                    variant="destructive"
+                                                    onClick={() => handleDeleteImage(deleteDialog.imageId!)}
+                                                    disabled={deleting}
+                                                    className="hover:cursor-pointer"
+                                                >
+                                                    {deleting ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : (
+                                                        "Yes, delete"
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </Card>
+                                    </div>
+                                )}
 
                                 {/* Buttons */}
                                 <div className="flex justify-between pt-6">

@@ -427,6 +427,13 @@ export async function deleteCarItem(id: string) {
 
 export async function deleteImageCarItemById(id: string) {
   try {
+    if (!id) {
+      return {
+        success: false,
+        message: "Image id is required",
+      };
+    }
+
     const deletedImage = await prisma.imagesOnCars.delete({
       where: { id },
     });
@@ -436,11 +443,11 @@ export async function deleteImageCarItemById(id: string) {
       data: deletedImage,
     };
   } catch (error: any) {
-    console.error("❌ Error deleting image:", error);
+    console.error("❌ Error deleting car image:", error);
 
     return {
       success: false,
-      message: error.message || "Failed to delete image",
+      message: error?.message || "Failed to delete image",
     };
   }
 }

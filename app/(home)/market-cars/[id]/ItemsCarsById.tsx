@@ -108,7 +108,7 @@ export default function ProductDetailPage({ cars }: ProductPageProps) {
     }
 
     return (
-        <div className="min-h-screen mt-20 bg-primary/5 dark:bg-gray-900" ref={bgRef}>
+        <div className="min-h-screen mt-17 bg-primary/5 dark:bg-gray-900" ref={bgRef}>
             {/* Breadcrumb */}
             <section className="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="container mx-auto">
@@ -148,35 +148,9 @@ export default function ProductDetailPage({ cars }: ProductPageProps) {
                     <div className="grid lg:grid-cols-2 gap-8 mb-12">
                         {/* Product Images */}
                         <div className="space-y-4">
-                            {/* <Card className="overflow-hidden dark:bg-gray-900 dark:border-gray-700 bg-primary/20 border border-primary/30">
-                                <CardContent className="p-0">
-                                    <div className="relative aspect-square">
-                                        <Image
-                                            src={cars.images[selectedImage]?.imageUrl || "/placeholder.svg"}
-                                            alt={cars.name}
-                                            fill
-                                            className="object-cover"
-                                            priority
-                                        />
-
-                                        {cars.discount && cars.discount > 0 && (
-                                            <Badge className="absolute top-4 right-4 bg-red-500 text-white text-lg">
-                                                -{cars.discount}%
-                                            </Badge>
-                                        )}
-                                        {!inStock && (
-                                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                                <Badge className="bg-red-500 text-white text-lg py-2 px-4">Out of Stock</Badge>
-                                            </div>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card> */}
-
                             <Card className="overflow-hidden dark:bg-gray-900 dark:border-gray-700 bg-primary/20 border border-primary/30">
                                 <CardContent className="p-0">
-                                    <div className="relative w-full h-90"> {/* حجم الصورة فقط */}
-
+                                    <div className="relative w-full  h-[360px] overflow-hidden">
                                         <Lens
                                             zoomFactor={2}
                                             lensSize={120}
@@ -190,6 +164,14 @@ export default function ProductDetailPage({ cars }: ProductPageProps) {
                                             />
                                         </Lens>
 
+                                        {/* <Lens zoomFactor={2} lensSize={120} isStatic={false}>
+                                            <img
+                                                src={cars.images[selectedImage]?.imageUrl || "/placeholder.svg"}
+                                                alt={cars.name}
+                                                className="absolute inset-0 w-full h-full object-cover"
+                                            />
+                                        </Lens> */}
+
                                         {cars.discount && cars.discount > 0 && (
                                             <Badge className="absolute top-4 right-4 bg-red-500 text-white text-lg z-10">
                                                 -{cars.discount}%
@@ -197,13 +179,12 @@ export default function ProductDetailPage({ cars }: ProductPageProps) {
                                         )}
 
                                         {!inStock && (
-                                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-20">
                                                 <Badge className="bg-red-500 text-white text-lg py-2 px-4">
                                                     Out of Stock
                                                 </Badge>
                                             </div>
                                         )}
-
                                     </div>
                                 </CardContent>
                             </Card>

@@ -150,12 +150,14 @@ export default function AuthToggle() {
                                     </div>
                                 </div>
 
-                                <div className="h-px w-full bg-white/20 rounded-full mb-2 hidden sm:block"></div>
 
-                                {user.role === "ADMIN" &&
+                                {user.role === "ADMIN" && <>
+                                    <div className="h-px w-full bg-white/20 rounded-full mb-2 hidden sm:block"></div>
+
                                     <Link href={"/dashboard"} className="m-1/2">
                                         <Button className="w-full bg-yellow-700 hover:bg-yellow-700/70 duration-500 hover:cursor-pointer text-white">Dashboard</Button>
                                     </Link>
+                                </>
                                 }
                             </div>
                         </div>

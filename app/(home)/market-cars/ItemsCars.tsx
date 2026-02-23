@@ -183,6 +183,25 @@ export default function ItemsCarsClient({ cars }: Props) {
                                             No image
                                         </div>
                                     )}
+
+                                    {/* company badge */}
+                                    {car.company && (
+                                        <div className="absolute top-3 left-3 flex items-center gap-2 bg-accent/50 backdrop-blur-md px-2 py-1 rounded-lg shadow">
+                                            {car.company.logo && (
+                                                <Image
+                                                    src={car.company.logo}
+                                                    alt={car.company.name}
+                                                    width={20}
+                                                    height={20}
+                                                    className="object-contain"
+                                                />
+                                            )}
+                                            <span className="text-xs font-semibold text-black dark:text-white">
+                                                {car.company.name}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     <h2 className="absolute bottom-3 bg-primary/40 px-2 left-4 text-xl font-bold text-black dark:text-white drop-shadow">
                                         {car.name}
                                     </h2>
@@ -210,16 +229,6 @@ export default function ItemsCarsClient({ cars }: Props) {
                                         <Button
                                             className="flex-1 hover:cursor-pointer"
                                             disabled={car.status !== "AVAILABLE"}
-                                            // onClick={() =>
-                                            //     addItem({
-                                            //         id: car.id,
-                                            //         name: car.name,
-                                            //         pricePerDay: car.pricePerDay,
-                                            //         discount: car.discount ?? 0,
-                                            //         images: car.images ?? [],
-                                            //     } as any)
-                                            // }
-                                            // onClick={() => addItem(car, 1)}
                                             onClick={() =>
                                                 addItem(
                                                     {
@@ -228,7 +237,7 @@ export default function ItemsCarsClient({ cars }: Props) {
                                                         model: car.model ?? { id: "unknown", name: "Unknown" },
                                                         images: (car.images ?? []).map(img => ({
                                                             ...img,
-                                                            carId: car.id, // <-- add the missing property
+                                                            carId: car.id,
                                                         })),
                                                     },
                                                     1
