@@ -1,143 +1,42 @@
-// /* eslint-disable @typescript-eslint/no-unused-vars */
-// "use client";
-
-// import { useState, useRef, } from "react";
-// import { Input } from "./ui/input";
-// import { Button } from "./ui/button";
-// import { Send } from "lucide-react";
-// import { toast } from "sonner";
-// import { v4 as uuidv4 } from "uuid";
-
-// export default function AIPage() {
-//     const [input, setInput] = useState("");
-//     const [messages, setMessages] = useState<{ type: "user" | "ai"; text: string }[]>([]);
-//     const [loading, setLoading] = useState(false);
-//     const messagesEndRef = useRef<HTMLDivElement>(null);
-
-//     // auto scroll to bottom
-//     // useEffect(() => {
-//     //     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-//     // }, [messages, loading]);
-
-//     // const handleSend = async () => {
-//     //     if (!input.trim()) return;
-
-//     //     const prompt = input;
-
-//     //     // add user message
-//     //     setMessages((prev) => [...prev, { type: "user", text: prompt }]);
-//     //     setInput("");
-//     //     setLoading(true);
-
-//     //     try {
-//     //         const aiResponse = await sendAIMessage(userId, prompt);
-
-//     //         setMessages((prev) => [...prev, { type: "ai", text: aiResponse }]);
-//     //     } catch (err) {
-//     //         console.error(err);
-//     //         setMessages((prev) => [
-//     //             ...prev,
-//     //             { type: "ai", text: "حدث خطأ، حاول مرة أخرى." },
-//     //         ]);
-//     //     } finally {
-//     //         setLoading(false);
-//     //     }
-//     // };
-
-//     const sendMessage = async (e?: React.FormEvent) => {
-
-//     };
-
-//     return (
-//         <div className="min-h-screen mt-17 flex justify-center">
-//             {/* Chat Card */}
-//             <div className="flex flex-col p-4 w-full h-screen rounded-2xl">
-
-//                 {/* Title */}
-//                 <h1 className="text-2xl font-bold mb-4 text-center text-purple-600">
-//                     Ask AI Question Cars
-//                 </h1>
-
-//                 {/* Messages area (scrollable) */}
-//                 <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-2 p-2 bg-blue-950/20 rounded-lg custom-scrollbar">
-//                     {messages.map((msg, idx) => (
-//                         <div
-//                             key={idx}
-//                             className={
-//                                 msg.type === "user"
-//                                     ? "self-end bg-blue-500 text-white p-3 rounded-xl max-w-[70%] wrap-break-word"
-//                                     : "self-start bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-xl max-w-[70%] wrap-break-word"
-//                             }
-//                         >
-//                             {msg.text}
-//                         </div>
-//                     ))}
-
-//                     {loading && (
-//                         <div className="self-start bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-xl max-w-[70%] animate-pulse">
-//                             AI is typing...
-//                         </div>
-//                     )}
-
-//                     <div ref={messagesEndRef} />
-//                 </div>
-
-//                 {/* Input area */}
-//                 <div className="flex gap-2 sticky bottom-0 bg-purple-900/10 backdrop-blur-sm rounded-lg p-2">
-//                     <Input
-//                         type="text"
-//                         value={input}
-//                         onChange={(e) => setInput(e.target.value)}
-//                         placeholder="Ask about a car..."
-//                         className="flex-1 p-6 rounded-lg border border-purple-950/80 bg-white dark:bg-gray-900 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-//                         onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-//                     />
-
-//                     <Button
-//                         onClick={handleSend}
-//                         size="lg"
-//                         className="group bg-blue-500 text-white py-6 rounded-lg hover:bg-blue-600 duration-500"
-//                     >
-//                         <Send
-//                             size={30}
-//                             className="group-hover:-translate-y-2 group-hover:translate-x-1.5 duration-500 group-hover:scale-125"
-//                         />
-//                     </Button>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// }
-
-
 "use client";
 
-import { useState, } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Send } from "lucide-react";
+import { useSession } from "next-auth/react";
+
+type Msg = { type: "user" | "ai"; text: string };
 
 export default function AIPage() {
     const [input, setInput] = useState("");
-    const [messages, setMessages] = useState<
-        { type: "user" | "ai"; text: string }[]
-    >([]);
+    const [messages, setMessages] = useState<Msg[]>([]);
     const [loading, setLoading] = useState(false);
 
+    const messagesRef = useRef<HTMLDivElement>(null);
+    const { data: session } = useSession();
+
+    // auto scroll
+    useEffect(() => {
+        const el = messagesRef.current;
+        if (!el) return;
+        el.scrollTop = el.scrollHeight;
+    }, [messages, loading]);
+
     const sendMessage = async () => {
-        if (!input.trim()) return;
+        if (!input.trim() || loading) return;
 
         const userText = input;
         setInput("");
 
-        // add user msg
-        setMessages((prev) => [...prev, { type: "user", text: userText }]);
+        setMessages((p) => [...p, { type: "user", text: userText }]);
         setLoading(true);
 
         try {
             const res = await fetch("/api/chat", {
                 method: "POST",
                 body: JSON.stringify({
+                    userId: session?.user?.id,
                     messages: [{ role: "user", content: userText }],
                 }),
             });
@@ -149,8 +48,7 @@ export default function AIPage() {
 
             let aiText = "";
 
-            // add empty AI bubble
-            setMessages((prev) => [...prev, { type: "ai", text: "" }]);
+            setMessages((p) => [...p, { type: "ai", text: "" }]);
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -159,64 +57,87 @@ export default function AIPage() {
                 const chunk = decoder.decode(value);
                 aiText += chunk;
 
-                // update last AI message
-                setMessages((prev) => {
-                    const copy = [...prev];
+                setMessages((p) => {
+                    const copy = [...p];
                     copy[copy.length - 1] = { type: "ai", text: aiText };
                     return copy;
                 });
             }
-        } catch (err) {
-            console.error(err);
+        } catch (e) {
+            console.error(e);
+            setMessages((p) => [
+                ...p,
+                { type: "ai", text: "Error generating response" },
+            ]);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen mt-17 flex justify-center">
-            <div className="flex flex-col p-4 w-full h-screen rounded-2xl">
-                <h1 className="text-2xl font-bold mb-4 text-center text-purple-600">
-                    Ask AI Question Cars
-                </h1>
+        <div className="h-[calc(100vh-68px)] mt-20 w-full flex justify-center">
+            {/* chat container */}
+            <div className="relative flex flex-col w-full max-w-5xl h-full">
 
-                <div className="flex-1 overflow-y-auto mb-4 flex flex-col gap-2 p-2 bg-blue-950/20 rounded-lg">
-                    {messages.map((msg, idx) => (
+                {/* messages */}
+                <div
+                    ref={messagesRef}
+                    className="
+            absolute inset-0 custom-scrollbar 
+            overflow-y-auto
+            flex flex-col gap-3
+            p-3 sm:p-4 md:p-6
+            pb-28
+            bg-accent dark:bg-blue-950/20
+            sm:rounded-2xl"
+                >
+                    {messages.map((m, i) => (
                         <div
-                            key={idx}
+                            key={i}
                             className={
-                                msg.type === "user"
-                                    ? "self-end bg-blue-500 text-white p-3 rounded-xl max-w-[70%]"
-                                    : "self-start bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-xl max-w-[70%]"
+                                m.type === "user"
+                                    ? "self-end bg-blue-500 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl max-w-[85%] sm:max-w-[70%]"
+                                    : "self-start bg-gray-200 dark:bg-gray-800 text-black dark:text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl max-w-[85%] sm:max-w-[70%]"
                             }
                         >
-                            {msg.text}
+                            {m.text}
                         </div>
                     ))}
 
                     {loading && (
-                        <div className="self-start bg-gray-200 dark:bg-gray-800 p-3 rounded-xl">
+                        <div className="self-start bg-gray-200 dark:bg-gray-800 px-4 py-2 rounded-2xl animate-pulse">
                             AI is typing...
                         </div>
                     )}
                 </div>
 
-                <div className="flex gap-2 sticky bottom-0 bg-purple-900/10 rounded-lg p-2">
-                    <Input
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Ask about a car..."
-                        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                    />
+                {/* input fixed */}
+                <div
+                    className="
+            absolute bottom-0 left-0 right-0
+            p-2 sm:p-3
+            bg-linear-to-t from-background via-background/80 to-transparent
+          "
+                >
+                    <div className="flex gap-2 items-center bg-background/80 backdrop-blur-xl border rounded-xl p-2 shadow-lg">
+                        <Input
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Ask about cars..."
+                            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                            className="border-0 focus-visible:ring-0 text-sm sm:text-base"
+                        />
 
-                    <Button
-                        onClick={sendMessage}
-                        size="lg"
-                        className="bg-blue-500 text-white"
-                    >
-                        <Send size={20} />
-                    </Button>
+                        <Button
+                            onClick={sendMessage}
+                            disabled={loading}
+                            className="bg-blue-500 hover:bg-blue-600 text-white shrink-0"
+                        >
+                            <Send size={18} />
+                        </Button>
+                    </div>
                 </div>
+
             </div>
         </div>
     );

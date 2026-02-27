@@ -20,6 +20,10 @@ import ThemeButton from "./dark-light-button"
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useLanguage } from "@/app/language-provider";
 import { Button } from "./ui/button";
+import { Language } from "@/app/i18n";
+import { FaLinkedin } from "react-icons/fa";
+import { FaSquareUpwork } from "react-icons/fa6";
+import { useCloseOnInteraction } from "@/hooks/useCloseOnInteraction";
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -33,6 +37,22 @@ export default function Header() {
 
     const user = useCurrentUser();
 
+    const { language, setLanguage } = useLanguage();
+
+    const langs: { code: Language; label: string }[] = [
+        { code: "en", label: "English" },
+        { code: "fr", label: "Français" },
+        { code: "ar", label: "العربية" },
+    ];
+
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useCloseOnInteraction({
+        isOpen: isMenuOpen,
+        onClose: () => setIsMenuOpen(false),
+        elementRef: menuRef,
+    });
+
     useEffect(() => {
         if (!user?.id) return;
 
@@ -43,6 +63,18 @@ export default function Header() {
 
         fetchCount();
     }, [user?.id]);
+
+    useEffect(() => {
+        if (isMenuOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isMenuOpen]);
 
     const [orderCount, setOrderCount] = useState(0);
 
@@ -231,7 +263,6 @@ export default function Header() {
                             </Button>
                         </Link>
 
-
                     </div>
                 </div>
 
@@ -350,7 +381,11 @@ export default function Header() {
             </nav>
 
             {isMenuOpen && (
-                <div className="md:hidden text-foreground dark:text-white bg-background/80 dark:bg-white/10 border-t border-border dark:border-white/20 backdrop-blur-md  p-4 flex flex-col gap-4">
+                <div
+                    ref={menuRef}
+                    className="md:hidden text-foreground dark:text-accent-foreground
+                border-t backdrop-blur-md p-4 flex flex-col gap-4 dark:bg-black/10
+                border-black/5 dark:border-white/10 z-999">
                     <Link
                         href="/"
                         className={clsx(
@@ -358,8 +393,8 @@ export default function Header() {
                             pathname === "/" ? "text-blue-500" : "hover:bg-accent hover:text-blue-500"
                         )}
                     >
-                        <House className="mr-1 w-5 h-5" />
-                        Home
+                        <House className="m-1 w-5 h-5" />
+                        {t("navbarHome")}
                     </Link>
 
                     <Link
@@ -369,8 +404,8 @@ export default function Header() {
                             pathname === "/MarketPlace" ? "text-yellow-500" : "hover:text-yellow-500"
                         )}
                     >
-                        <Car className="mr-1 w-5 h-5" />
-                        MarketCars
+                        <Car className="m-1 w-5 h-5" />
+                        {t("navbarMarketCars")}
                     </Link>
 
                     <Link
@@ -380,8 +415,8 @@ export default function Header() {
                             pathname === "/Service" ? "text-purple-500" : "hover:text-purple-500"
                         )}
                     >
-                        <Handshake className="mr-1 w-5 h-5" />
-                        Service
+                        <Handshake className="m-1 w-5 h-5" />
+                        {t("navbarService")}
                     </Link>
 
                     <div className="h-px w-full dark:bg-slate-200/20 bg-gray-200" />
@@ -396,57 +431,92 @@ export default function Header() {
                         <span className="absolute -top-1 right-1/4 bg-yellow-500 text-white rounded-full text-xs w-5 h-4 flex items-center justify-center">
                             {orderCount ? orderCount : 0}
                         </span>
-                        <ShoppingCart className="mr-1 w-5 h-5" />
-                        Your Orders
+                        <ShoppingCart className="m-1 w-5 h-5" />
+                        {t("navbarYourOrders")}
                     </Link>
 
-                    {/* <div className="flex flex-col gap-2 pt-4 border-t border-primary/20">
-                        {user ?
-                            <div className="flex flex-col gap-2 w-full">
-                                <div className="flex gap-4">
-                                    <Link href={"/settings"} className="w-1/2">
-                                        <Button variant="outline" className="w-full hover:cursor-pointer text-black">Settings</Button>
-                                    </Link>
+                    <Link href="/Ai-cars" className="relative inline-flex items-center justify-center group">
+                        {/* Animated Border */}
+                        <div
+                            className="
+  absolute inset-y-0 left-1/2 -translate-x-1/2
+  w-1/4 md:w-3/4
+  rounded-lg
+  bg-linear-to-r from-blue-400 via-purple-400 to-pink-400
+  blur-md md:blur-lg
+  opacity-60 group-hover:opacity-100
+  transition duration-500
+  "
+                        />
 
-                                    <Button variant="destructive" className="w-1/2 over:cursor-pointer" onClick={() => signOut()}>Logout</Button>
-                                </div>
+                        {/* Button */}
+                        <Button
+                            className="relative flex items-center gap-2 px-6 py-3 rounded-lg bg-black hover:bg-transparent bg-opacity-30 text-white font-bold uppercase tracking-wider shadow-lg
+                hover:border-white hover:border-opacity-20 transition-all duration-500
+              z-10 border border-white border-opacity-20 backdrop-blur-sm"
+                        >
+                            <svg
+                                className="w-8 h-8 animate-bounce text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16h6" />
+                            </svg>
+                            Ask AI
+                        </Button>
+                    </Link>
 
-                                {user.role === "ADMIN" &&
-                                    <Link href={"/dashboard"} className="m-1/2">
-                                        <Button className="w-full bg-yellow-700 hover:bg-yellow-700/70 duration-500 hover:cursor-pointer text-white">Dashboard</Button>
-                                    </Link>
-                                }
+                    <div className="flex sm:flex-row flex-col sm:justify-center items-center gap-3">
+                        <div className="text-sm font-medium text-accent-foreground">
+                            Language :
+                        </div>
 
-                            </div>
-                            :
-                            <div className="flex gap-2 w-full">
-                                <Link href="/auth/login" className="w-1/2">
-                                    <Button
-                                        variant="outline"
-                                        className="w-full hover:cursor-pointer border-primary text-primary hover:text-primary bg-black/10 hover:bg-black/20 duration-500"
-                                        onClick={playSound}
-                                    >
-                                        Login
-                                    </Button>
-                                </Link>
+                        <div className="flex items-center bg-slate-800/60 border border-white/10 rounded-xl p-1">
+                            {langs.map((lang) => (
+                                <button
+                                    key={lang.code}
+                                    onClick={() => setLanguage(lang.code)}
+                                    className={clsx(
+                                        "px-4 py-2 text-sm rounded-lg transition-all duration-300",
+                                        language === lang.code
+                                            ? "bg-slate-700 text-white shadow"
+                                            : "text-slate-400 hover:text-white"
+                                    )}
+                                >
+                                    {lang.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
-                                <Link href="/auth/register" className="w-1/2">
-                                    <Button
-                                        className="w-full hover:cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground duration-500"
-                                        onClick={playSound}
-                                    >
-                                        Register
-                                    </Button>
-                                </Link>
-                            </div>
-                        }
-                    </div> */}
-
-                    <div className="text-sm font-medium">Language:</div>
-
-                    <div className="text-sm font-medium">Social Media:</div>
+                    {/* <div className="flex sm:flex-row flex-col sm:justify-center items-center gap-3"> */}
+                    <div className="flex items-center justify-center gap-3 m-3">
+                        <div className="text-sm font-medium">Social Media:</div>
+                        <div className="flex gap-4">
+                            <Link
+                                href="https://www.linkedin.com/in/mohamed-ali-theiri-274540311"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                            >
+                                <FaLinkedin size={24} />
+                            </Link>
+                            <Link
+                                href="https://www.upwork.com/freelancers/~01e8d2f1bf7276b7cd?mp_source=share"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-green-600 hover:text-green-800"
+                            >
+                                <FaSquareUpwork size={24} />
+                            </Link>
+                        </div>
+                    </div>
                 </div>
-            )}
-        </header>
+            )
+            }
+        </header >
     )
 }

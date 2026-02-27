@@ -69,14 +69,124 @@
 //   }
 // }
 
-import { NextRequest } from "next/server";
+////////////////////////////////////////////////////////
+// import { NextRequest } from "next/server";
 
-export const runtime = "edge";
+// export const runtime = "edge";
+
+// export async function POST(req: NextRequest) {
+//   try {
+//     const { messages } = await req.json();
+
+//     const response = await fetch(
+//       "https://openrouter.ai/api/v1/chat/completions",
+//       {
+//         method: "POST",
+//         headers: {
+//           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+//           "Content-Type": "application/json",
+//           "HTTP-Referer": "http://localhost:3000",
+//           "X-Title": "My Next.js App",
+//         },
+//         body: JSON.stringify({
+//           model: "google/gemini-2.5-flash-lite-preview-09-2025",
+//           messages,
+//           stream: true,
+//         }),
+//       },
+//     );
+
+//     if (!response.body) {
+//       return new Response("No stream", { status: 500 });
+//     }
+
+//     const encoder = new TextEncoder();
+//     const decoder = new TextDecoder();
+
+//     const stream = new ReadableStream({
+//       async start(controller) {
+//         const reader = response.body!.getReader();
+
+//         while (true) {
+//           const { done, value } = await reader.read();
+//           if (done) break;
+
+//           const chunk = decoder.decode(value);
+//           const lines = chunk.split("\n");
+
+//           for (const line of lines) {
+//             if (!line.startsWith("data:")) continue;
+//             if (line.includes("[DONE]")) {
+//               controller.close();
+//               return;
+//             }
+
+//             try {
+//               const json = JSON.parse(line.replace("data:", "").trim());
+//               const text = json.choices?.[0]?.delta?.content;
+
+//               if (text) {
+//                 controller.enqueue(encoder.encode(text));
+//               }
+//             } catch (err) {
+//               console.error("Parse error", err);
+//             }
+//           }
+//         }
+
+//         controller.close();
+//       },
+//     });
+
+//     return new Response(stream);
+//   } catch (error) {
+//     console.error("API error:", error);
+//     return new Response("Something went wrong", { status: 500 });
+//   }
+// }
+
+////////////////////////////////////////////////////////
+
+import { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export const runtime = "nodejs"; // مهم مع prisma
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
+    const { messages, userId, chatId } = await req.json();
 
+    if (!messages || !userId) {
+      return new Response("Missing data", { status: 400 });
+    }
+
+    let chat = null;
+
+    // ✅ create chat if not exist
+    if (chatId) {
+      chat = await prisma.aIChat.findUnique({
+        where: { id: chatId },
+      });
+    }
+
+    if (!chat) {
+      chat = await prisma.aIChat.create({
+        data: { userId },
+      });
+    }
+
+    const userMessage = messages[messages.length - 1];
+
+    // ✅ save USER message
+    await prisma.aIMessage.create({
+      data: {
+        chatId: chat.id,
+        sender: "USER",
+        content: userMessage.content,
+      },
+    });
+
+    // ✅ call AI
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -84,8 +194,6 @@ export async function POST(req: NextRequest) {
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "http://localhost:3000",
-          "X-Title": "My Next.js App",
         },
         body: JSON.stringify({
           model: "google/gemini-2.5-flash-lite-preview-09-2025",
@@ -102,6 +210,8 @@ export async function POST(req: NextRequest) {
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
+    let fullAIText = "";
+
     const stream = new ReadableStream({
       async start(controller) {
         const reader = response.body!.getReader();
@@ -115,7 +225,17 @@ export async function POST(req: NextRequest) {
 
           for (const line of lines) {
             if (!line.startsWith("data:")) continue;
+
             if (line.includes("[DONE]")) {
+              // ✅ save AI message
+              await prisma.aIMessage.create({
+                data: {
+                  chatId: chat.id,
+                  sender: "AI",
+                  content: fullAIText,
+                },
+              });
+
               controller.close();
               return;
             }
@@ -125,11 +245,10 @@ export async function POST(req: NextRequest) {
               const text = json.choices?.[0]?.delta?.content;
 
               if (text) {
+                fullAIText += text;
                 controller.enqueue(encoder.encode(text));
               }
-            } catch (err) {
-              console.error("Parse error", err);
-            }
+            } catch {}
           }
         }
 
@@ -137,9 +256,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return new Response(stream);
-  } catch (error) {
-    console.error("API error:", error);
-    return new Response("Something went wrong", { status: 500 });
+    return new Response(stream, {
+      headers: { "Content-Type": "text/plain" },
+    });
+  } catch (e) {
+    console.error("CHAT API ERROR:", e);
+    return new Response("Server error", { status: 500 });
   }
 }

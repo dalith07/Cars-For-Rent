@@ -226,16 +226,21 @@ export default function CarItems({ carsItems }: carsItemsProps) {
         },
     });
 
+    const totalImages = images.length;
+    const remainingSlots = 4 - totalImages;
+
     const onDrop = useCallback(
         async (acceptedFiles: File[]) => {
-            const totalImages = carsItems.images.length + images.length;
+            // const totalImages = carsItems.images.length + images.length;
+            // const remainingSlots = 4 - totalImages;
+
+            const totalImages = images.length; // ✅ FIX
             const remainingSlots = 4 - totalImages;
 
             if (remainingSlots <= 0) {
                 toast.warning("Maximum 4 images allowed");
                 return;
             }
-
             const filesToAdd = acceptedFiles.slice(0, remainingSlots);
             const newImages = filesToAdd.map((file) => ({
                 file,
