@@ -20,7 +20,7 @@ export default async function AdminLayout({
                     <NotificationClientWrapper />
 
                     {/* 🟢 Online / Offline listener */}
-                    <PresenceClientWrapper />
+                    <PresenceClientWraapper />
 
                     {children}
                 </SidebarInset>

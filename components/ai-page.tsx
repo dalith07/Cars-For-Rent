@@ -91,7 +91,7 @@ export default function AIPage() {
             bg-accent dark:bg-blue-950/20
             sm:rounded-2xl"
                 >
-                    {messages.map((m, i) => (
+                    {/* {messages.map((m, i) => (
                         <div
                             key={i}
                             className={
@@ -101,6 +101,23 @@ export default function AIPage() {
                             }
                         >
                             {m.text}
+                        </div>
+                    ))} */}
+
+                    {messages.map((m, i) => (
+                        <div
+                            key={i}
+                            className={
+                                m.type === "user"
+                                    ? "self-end bg-blue-500 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl max-w-[85%] sm:max-w-[70%]"
+                                    : "self-start bg-gray-200 dark:bg-gray-800 text-black dark:text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl max-w-[85%] sm:max-w-[70%]"
+                            }
+                        >
+                            {m.type === "ai" ? (
+                                <span dangerouslySetInnerHTML={{ __html: m.text }} />
+                            ) : (
+                                m.text
+                            )}
                         </div>
                     ))}
 

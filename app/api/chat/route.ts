@@ -1,83 +1,43 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { NextRequest, NextResponse } from "next/server";
+// import { NextRequest } from "next/server";
+// import { prisma } from "@/lib/prisma";
 
-// export const runtime = "edge";
-// import axios from "axios";
+// export const runtime = "nodejs"; // مهم مع prisma
+
 // export async function POST(req: NextRequest) {
 //   try {
-//     const { messages } = await req.json();
+//     const { messages, userId, chatId } = await req.json();
 
-//     const response = await axios.post(
-//       "https://openrouter.ai/api/v1/chat/completions",
-//       {
-//         model: "google/gemini-2.5-flash-lite-preview-09-2025",
-//         messages,
-//         stream: true,
+//     if (!messages || !userId) {
+//       return new Response("Missing data", { status: 400 });
+//     }
+
+//     let chat = null;
+
+//     // ✅ create chat if not exist
+//     if (chatId) {
+//       chat = await prisma.aIChat.findUnique({
+//         where: { id: chatId },
+//       });
+//     }
+
+//     if (!chat) {
+//       chat = await prisma.aIChat.create({
+//         data: { userId },
+//       });
+//     }
+
+//     const userMessage = messages[messages.length - 1];
+
+//     // ✅ save USER message
+//     await prisma.aIMessage.create({
+//       data: {
+//         chatId: chat.id,
+//         sender: "USER",
+//         content: userMessage.content,
 //       },
-//       {
-//         method: "POST",
-//         headers: {
-//           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-//           "Content-Type": "application/json",
-//           "HTTP-Refrere": "http://localhost:3000",
-//           "X-Title": "My Next.js App",
-//         },
-//         responseType: "stream",
-//       },
-//     );
-
-//     const stream = response.data;
-
-//     const readable = new ReadableStream({
-//       async start(controller) {
-//         stream.on("data", (chunk: any) => {
-//           const payloads = chunk.toString().split("\n\n");
-//           for (const payload of payloads) {
-//             if (payload.includes("[DONE")) {
-//               controller.close();
-//               return;
-//             }
-//           }
-//           if (payload.startWith("data")) {
-//             try {
-//                 const data=JSON.parse(payload.replace())
-//                 const text=data.choices[0]?.delta?
-//                 if (text) {
-//                     controller.enqueue{encoder.encode()}
-//                 }
-//             } catch (err) {
-//                 console.log("Error parsing stream", err)
-//             }
-//           }
-//         });
-
-//         stream.on("end",()=>{
-//             controller.close()
-//         })
-
-//         stream.on("error",(err:any)=>{
-//             console.error("Stream error",err)
-//             controller.error(err)
-//         })
-//     },
 //     });
 
-//     return new NextResponse(readable,{})
-//   } catch (error) {
-//     console.error("API error:", error);
-//     return new Response("Something went wrong", { status: 500 });
-//   }
-// }
-
-////////////////////////////////////////////////////////
-// import { NextRequest } from "next/server";
-
-// export const runtime = "edge";
-
-// export async function POST(req: NextRequest) {
-//   try {
-//     const { messages } = await req.json();
-
+//     // ✅ call AI
 //     const response = await fetch(
 //       "https://openrouter.ai/api/v1/chat/completions",
 //       {
@@ -85,8 +45,6 @@
 //         headers: {
 //           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
 //           "Content-Type": "application/json",
-//           "HTTP-Referer": "http://localhost:3000",
-//           "X-Title": "My Next.js App",
 //         },
 //         body: JSON.stringify({
 //           model: "google/gemini-2.5-flash-lite-preview-09-2025",
@@ -103,6 +61,8 @@
 //     const encoder = new TextEncoder();
 //     const decoder = new TextDecoder();
 
+//     let fullAIText = "";
+
 //     const stream = new ReadableStream({
 //       async start(controller) {
 //         const reader = response.body!.getReader();
@@ -116,7 +76,17 @@
 
 //           for (const line of lines) {
 //             if (!line.startsWith("data:")) continue;
+
 //             if (line.includes("[DONE]")) {
+//               // ✅ save AI message
+//               await prisma.aIMessage.create({
+//                 data: {
+//                   chatId: chat.id,
+//                   sender: "AI",
+//                   content: fullAIText,
+//                 },
+//               });
+
 //               controller.close();
 //               return;
 //             }
@@ -126,11 +96,10 @@
 //               const text = json.choices?.[0]?.delta?.content;
 
 //               if (text) {
+//                 fullAIText += text;
 //                 controller.enqueue(encoder.encode(text));
 //               }
-//             } catch (err) {
-//               console.error("Parse error", err);
-//             }
+//             } catch {}
 //           }
 //         }
 
@@ -138,19 +107,19 @@
 //       },
 //     });
 
-//     return new Response(stream);
-//   } catch (error) {
-//     console.error("API error:", error);
-//     return new Response("Something went wrong", { status: 500 });
+//     return new Response(stream, {
+//       headers: { "Content-Type": "text/plain" },
+//     });
+//   } catch (e) {
+//     console.error("CHAT API ERROR:", e);
+//     return new Response("Server error", { status: 500 });
 //   }
 // }
-
-////////////////////////////////////////////////////////
 
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const runtime = "nodejs"; // مهم مع prisma
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
@@ -160,9 +129,11 @@ export async function POST(req: NextRequest) {
       return new Response("Missing data", { status: 400 });
     }
 
+    // =========================
+    // 1️⃣ create / get chat
+    // =========================
     let chat = null;
 
-    // ✅ create chat if not exist
     if (chatId) {
       chat = await prisma.aIChat.findUnique({
         where: { id: chatId },
@@ -177,7 +148,9 @@ export async function POST(req: NextRequest) {
 
     const userMessage = messages[messages.length - 1];
 
-    // ✅ save USER message
+    // =========================
+    // 2️⃣ save USER message
+    // =========================
     await prisma.aIMessage.create({
       data: {
         chatId: chat.id,
@@ -186,7 +159,104 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // ✅ call AI
+    // =========================
+    // 3️⃣ extract persons
+    // =========================
+    const personsMatch = userMessage.content.match(/\d+/);
+    const persons = personsMatch ? Number(personsMatch[0]) : 1;
+
+    // =========================
+    // 4️⃣ get cars from DB
+    // =========================
+    const cars = await prisma.car.findMany({
+      where: {
+        status: "AVAILABLE",
+        stock: { gte: persons },
+      },
+      take: 10,
+    });
+
+    // =========================
+    // 5️⃣ build cars context
+    // =========================
+    // const carsContext =
+    //   cars.length > 0
+    //     ? cars
+    //         .map(
+    //           (c) =>
+    //             `${c.name} type:${c.categoryId ?? "car"} transmission:${c.transmission} price:${c.pricePerDay}`,
+    //         )
+    //         .join("\n")
+    //     : "No cars available in database";
+
+    const carsContext =
+      cars.length > 0
+        ? cars.map((c) => `${c.name} (id:${c.id})`).join("\n")
+        : "No cars available in database";
+
+    // =========================
+    // 6️⃣ system prompt
+    // =========================
+    //     const systemPrompt = `
+    // You are a car rental assistant.
+
+    // IMPORTANT RULES:
+    // - You MUST always recommend cars from the available database list if any exist
+    // - Do NOT say no cars available if database has cars
+    // - Choose cars suitable for the number of people mentioned
+    // - Small group (1-3): sedan or compact
+    // - Medium group (4-5): SUV
+    // - Large group (6+): van or large SUV
+    // - Respond in clean plain text
+    // - Keep answer friendly and natural
+    // - Mention car names from database
+
+    // Available cars:
+    // ${carsContext}
+    // `;
+
+    /////////////////////////////////////////////
+    //     const systemPrompt = `
+    // You are a car rental assistant.
+
+    // IMPORTANT:
+    // - Always recommend cars from database if available
+    // - When mentioning a car, format it exactly like this:
+    // <a href="/market-cars/CAR_ID" class="car-link">CAR_NAME</a>
+
+    // Example:
+    // <a href="/market-cars/abc123" class="car-link">BMW M3 Competition</a>
+
+    // Rules:
+    // - Replace CAR_ID with the id from database
+    // - Replace CAR_NAME with the car name
+    // - Do not invent ids
+    // - Use only cars from provided list
+    // - Respond in clean HTML text (no markdown)
+
+    // Available cars:
+    // ${carsContext}
+    // `;
+
+    /////////////////////////////////////////////
+    const systemPrompt = `
+You are a car rental assistant.
+
+Rules:
+- First, check the available database cars
+- If suitable cars exist, recommend ONLY database cars
+- If no suitable cars exist, suggest appropriate cars from general knowledge
+- Clearly separate database cars and external suggestions
+- Always prefer database cars when possible
+- Respond in clean natural text (no markdown)
+
+Available database cars:
+${carsContext}
+`;
+
+    // =========================
+    // 7️⃣ call Gemini
+    // =========================
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -197,8 +267,8 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           model: "google/gemini-2.5-flash-lite-preview-09-2025",
-          messages,
           stream: true,
+          messages: [{ role: "system", content: systemPrompt }, ...messages],
         }),
       },
     );
@@ -212,6 +282,9 @@ export async function POST(req: NextRequest) {
 
     let fullAIText = "";
 
+    // =========================
+    // 8️⃣ stream back
+    // =========================
     const stream = new ReadableStream({
       async start(controller) {
         const reader = response.body!.getReader();
@@ -227,7 +300,7 @@ export async function POST(req: NextRequest) {
             if (!line.startsWith("data:")) continue;
 
             if (line.includes("[DONE]")) {
-              // ✅ save AI message
+              // save AI message
               await prisma.aIMessage.create({
                 data: {
                   chatId: chat.id,

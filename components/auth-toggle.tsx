@@ -21,11 +21,19 @@ export default function AuthToggle() {
     const ref = useRef<HTMLDivElement>(null)
     const buttonRef = useRef<HTMLButtonElement>(null);
 
-    const playSound = () => {
-        const audio = new Audio("/sounds/sound_mouse.mp3");
-        audio.volume = 0.5;
-        // audio.playbackRate = 1.3;  SPEED SOUND
-        audio.play().catch((err) => console.log("Audio error:", err));
+    const playSound = async () => {
+        const audio = new Audio("/sounds/button-click-sound.mp3");
+
+        const context = new AudioContext();
+        const source = context.createMediaElementSource(audio);
+
+        const gainNode = context.createGain();
+        gainNode.gain.value = 2; // 2x louder (be careful of distortion)
+
+        source.connect(gainNode);
+        gainNode.connect(context.destination);
+
+        audio.play();
     };
 
     // Close the card when clicking outside
