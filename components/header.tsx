@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -11,7 +10,6 @@ import AuthToggle from "./auth-toggle"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useCart } from "@/lib/cart_context"
 import { getOrderCount } from "@/actions/cart"
-// import LanguageSwitcher from "./LanguageSwitcher"
 import NotificationsCard from "./notifications-card"
 import { getUserNotificationsCount } from "@/actions/dashboard/notifications"
 import { Dialog, DialogContent, } from "./ui/dialog"
@@ -94,6 +92,7 @@ export default function Header() {
         }, 5000);
 
         return () => clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Animate fade in/out with GSAP whenever text changes
@@ -117,8 +116,6 @@ export default function Header() {
 
     const { getTotalItems } = useCart()
     const totalItems = getTotalItems()
-
-    // Count orders for this user
 
     useEffect(() => {
         if (!user?.id) return;
