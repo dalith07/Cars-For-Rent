@@ -65,26 +65,32 @@ export default function AuthToggle() {
                     playSound();
                     setOpen(prev => !prev);
                 }}
-                className="inline-flex items-center justify-center
-               w-11 h-11 rounded-full
-               bg-white/10 text-gray-500
-               hover:bg-blue-500/10 duration-500
-               border border-gray-500/20 hover:cursor-pointer"
+                className="relative inline-flex items-center justify-center w-10 h-10 
+                rounded-full bg-white/10 text-gray-500 hover:bg-blue-500/10 
+                duration-500 border border-gray-500/20 hover:cursor-pointer"
             >
-                {user?.image ? (
-                    <Image
-                        src={user.image}
-                        alt="image"
-                        width={50}
-                        height={50}
-                        className="rounded-full w-full h-full"
-                    />
-                ) : (
-                    <User size={22} />
-                )}
+                {/* wrapper مسؤول غير على الصورة تولي دائرية */}
+                <div className="relative w-full h-full rounded-full overflow-hidden">
+                    {user?.image ? (
+                        <div className="relative w-full h-full">
+                            <Image
+                                src={user.image || "/logo_user.png"}
+                                alt="image user"
+                                fill
+                                sizes="40px"
+                                className="object-cover"
+                            />
+                        </div>
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                            <User size={22} />
+                        </div>
+                    )}
+                </div>
 
+                {/* badge برا الـ overflow-hidden باش تبان كاملة */}
                 {user?.role === "ADMIN" && (
-                    <span className="absolute top-0 right-0 text-yellow-500">
+                    <span className="absolute -top-1 -right-1 text-yellow-500 z-10">
                         <FaStar size={15} className="animate-pulse" />
                     </span>
                 )}

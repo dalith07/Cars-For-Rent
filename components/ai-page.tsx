@@ -382,7 +382,7 @@ export default function AIPage() {
                                         }`}
                                 >
                                     <div
-                                        className={`inline-block w-fit max-w-[80%] px-4 py-2.5 whitespace-pre-wrap break-words leading-relaxed text-sm sm:text-base ${m.type === "user"
+                                        className={`inline-block w-fit max-w-[80%] px-4 py-2.5 whitespace-pre-wrap wrap-break-word leading-relaxed text-sm sm:text-base ${m.type === "user"
                                             ? "rounded-3xl rounded-br-md bg-blue-600 text-white"
                                             : "rounded-3xl rounded-bl-md border border-blue-500/20 bg-slate-900 text-white"
                                             }`}
