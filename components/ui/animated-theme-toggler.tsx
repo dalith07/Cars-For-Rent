@@ -210,14 +210,17 @@ export const AnimatedThemeToggler = ({
       onClick={toggleTheme}
       className={cn(
         `
-        relative w-11 h-11 rounded-full
-        border duration-500
-        flex items-center justify-center
-        hover:cursor-pointer
+    relative w-11 h-11 rounded-full
+    border border-border
+    transition-all duration-500
+    flex items-center justify-center
+    hover:cursor-pointer
 
-        bg-background dark:bg-accent-foreground
-      text-accent-foreground dark:text-accent       
-        `,
+    bg-white text-gray-900
+    dark:bg-zinc-900 dark:text-yellow-400
+
+    hover:scale-105
+    `,
         className
       )}
       {...props}

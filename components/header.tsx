@@ -702,6 +702,8 @@ export default function Header() {
                         )}
                     </Link>
 
+                    <ThemeButton />
+
                     {/* Notifications */}
                     {user?.role === "USER" && (
                         <div className="relative">
